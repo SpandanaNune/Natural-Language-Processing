@@ -1,0 +1,12 @@
+@relation 'preposition_test'
+
+@attribute node1Pos {verb,noun,adverb,adjective,useless}
+@attribute node1RealPos {$,CC,CD,DT,EX,FW,IN,JJ,JJR,JJS,LS,MD,NN,NNS,NNP,NNPS,PDT,POS,PRP,PRP$,RB,RBR,RBS,RP,TO,UH,VB,VBD,VBG,VBN,VBP,VBZ,WDT,WP,WP$,WRB}
+@attribute node2Pos {verb,noun,adverb,adjective,useless}
+@attribute node2RealPos {$,CC,CD,DT,EX,FW,IN,JJ,JJR,JJS,LS,MD,NN,NNS,NNP,NNPS,PDT,POS,PRP,PRP$,RB,RBR,RBS,RP,TO,UH,VB,VBD,VBG,VBN,VBP,VBZ,WDT,WP,WP$,WRB}
+@attribute node1Superclass {body,person,location,consumption,change,indefinite,negative_feeling_descriptive,phenomenon,time,social,event,weather,year,quantity,motion,positive-emotion_descriptive,stative,motive,relation,positive_emotion_descriptive,number,origin_descriptive,shape,tone_descriptive,superlative,emotion,ppl,negative-emotion_descriptive,food,comparative,color_descriptive,positive-feeling_descriptive,quality_descriptive,negative-tone_descriptive,plant,creation,perception,state,attribute,touch_descriptive,pert,object,contact,substance,time_descriptive,positive-tone_descriptive,all,animal,Tops,communication,shape_descriptive,positive_feeling_descriptive,negative-feeling_descriptive,process,age_descriptive,artifact,noSuperclass,possession,feeling,positive_tone_descriptive,act,cognition,group,negative_tone_descriptive,competition,size_descriptive}
+@attribute node2Superclass {body,person,location,consumption,change,indefinite,negative_feeling_descriptive,phenomenon,time,social,event,weather,year,quantity,motion,positive-emotion_descriptive,stative,motive,relation,positive_emotion_descriptive,number,origin_descriptive,shape,tone_descriptive,superlative,emotion,ppl,negative-emotion_descriptive,food,comparative,color_descriptive,positive-feeling_descriptive,quality_descriptive,negative-tone_descriptive,plant,creation,perception,state,attribute,touch_descriptive,pert,object,contact,substance,time_descriptive,positive-tone_descriptive,all,animal,Tops,communication,shape_descriptive,positive_feeling_descriptive,negative-feeling_descriptive,process,age_descriptive,artifact,noSuperclass,possession,feeling,positive_tone_descriptive,act,cognition,group,negative_tone_descriptive,competition,size_descriptive}
+@attribute argsOccCount numeric
+@attribute superclassOccCount numeric
+
+@data

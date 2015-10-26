@@ -1,0 +1,137 @@
+//Definition structure :
+//DEP1#DEP2#DEP3#....#DEPn%LABEL=LAB1#LAB2#....#LABn
+//where, DEP1...n are syntactic dependency touple as explained;
+//if dep(X,Y) is syntactic dependency then,
+//DEPx = dep;node label for X i.e. N1 or N2 ...;POS(X),superclass(X);node label for Y i.e. N1 or N2 ...;POS(Y),superclass(Y)
+//POS(X) = first letter of the Part of Speech
+//X should be used in place of superclass in case superclass is not required for mapping
+//LAB1...n are final labels from semantic mapping, each LAB has following structure:
+//LABx = N1;postfix for N1;N2;postfix for N2;label
+//here, N1 and N2 define the node labels of start and end node in final mapping and postfix defines the text after the node label (if no postfix is required then write X)
+cop;N1,J,X;N2,V,X	nsubj;N1,J,X;N3,N,X LABEL=N3;X;N1;X;trait	N2;X;N3;X;agent
+cop;N1,J,X;N2,V,X	nsubj;N1,J,X;N3,P,X LABEL=N3;X;N1;X;trait	N2;X;N3;X;agent
+cop;N1,N,X;N2,V,X	nsubj;N1,N,X;N3,N,X LABEL=N2;X;N1;X;recipient	N2;X;N3;X;agent
+cop;N1,P,X;N2,V,X	nsubj;N1,P,X;N3,N,X LABEL=N2;X;N1;X;recipient	N2;X;N3;X;agent
+cop;N1,P,X;N2,V,X	nsubj;N1,P,X;N3,P,X LABEL=N2;X;N1;X;recipient	N2;X;N3;X;agent
+//
+nsubj;N1,V,X;N2,N,X LABEL=N1;X;N2;X;agent
+nsubj;N1,V,X;N2,P,X LABEL=N1;X;N2;X;agent
+nsubj;N1,V,X;N2,W,X LABEL=N1;X;N2;X;agent
+//
+xsubj;N1,V,X;N2,N,X LABEL=N1;X;N2;X;agent
+xsubj;N1,V,X;N2,P,X LABEL=N1;X;N2;X;agent
+xsubj;N1,V,X;N2,W,X LABEL=N1;X;N2;X;agent
+//
+agent;N1,V,X;N2,N,X LABEL=N1;X;N2;X;agent
+agent;N1,V,X;N2,P,X LABEL=N1;X;N2;X;agent
+agent;N1,V,X;N2,W,X LABEL=N1;X;N2;X;agent
+//
+csubj;N1,V,X;N2,N,X LABEL=N1;X;N2;X;agent
+csubj;N1,V,X;N2,P,X LABEL=N1;X;N2;X;agent
+csubj;N1,V,X;N2,W,X LABEL=N1;X;N2;X;agent
+//
+csubj;N1,V,X;N2,V,X LABEL=N1;X;N2;X;subject
+csubjpass;N1,V,X;N2,V,X LABEL=N1;X;N2;X;passive_subject
+//
+dobj;N1,V,X;N2,N,X LABEL=N1;X;N2;X;recipient
+dobj;N1,V,X;N2,W,X LABEL=N1;X;N2;X;recipient
+dobj;N1,V,X;N2,P,X LABEL=N1;X;N2;X;recipient
+//
+iobj;N1,V,X;N2,N,X LABEL=N1;X;N2;X;recipient
+iobj;N1,V,X;N2,P,X LABEL=N1;X;N2;X;recipient
+iobj;N1,V,X;N2,W,X LABEL=N1;X;N2;X;recipient
+//
+nsubjpass;N1,V,X;N2,N,X LABEL=N1;X;N2;X;recipient
+nsubjpass;N1,V,X;N2,P,X LABEL=N1;X;N2;X;recipient
+nsubjpass;N1,V,X;N2,W,X LABEL=N1;X;N2;X;recipient
+//
+amod;N1,N,X;N2,J,X LABEL=N1;X;N2;X;trait
+xcomp;N1,V,X;N2,V,X LABEL=N1;X;N2;X;objective
+//
+acomp;N1,V,X;N2,J,X LABEL=N1;X;N2;X;object
+acomp;N1,V,X;N2,R,X LABEL=N1;X;N2;X;information_content
+//ccomp;N1,V,X;N2,V,X LABEL=N1;X;N2;X;resulting_state
+neg;N1,X,X;N2,X,X LABEL=N1;X;N2;X;negative
+poss;N1,N,non person;N2,N,X LABEL=N1;X;N2;X;is_possessed_by
+poss;N1,N,person;N2,N,X LABEL=N1;X;N2;X;is_related_to
+poss;N1,N,non person;N2,P,X LABEL=N1;X;N2;X;is_possessed_by
+poss;N1,N,person;N2,P,X LABEL=N1;X;N2;X;is_related_to
+nn;N1,N,X;N2,N,X LABEL=N1;X;N2;X;complement_word
+num;N1,N,X;N2,CD,X LABEL=N1;X;N2;X;size
+tmod;N1,V,X;N2,N,X LABEL=N1;X;N2;X;time
+appos;N1,N,X;N2,N,X LABEL=N1;X;N2;X;information_content
+prt;N1,V,X;N2,X,X LABEL=N1;X;N2;X;verb_complement
+//advcl;N1,V,X;N2,V,X LABEL=N1;X;N2;X;causes
+advmod;N1,V,X;N2,R,X LABEL=N1;X;N2;X;modifier
+advmod;N1,V,X;N2,W,X LABEL=N1;X;N2;X;modifier
+aux;N1,V,X;N2,V,X LABEL=N1;X;N2;X;supporting_verb
+aux;N1,V,X;N2,M,X LABEL=N1;X;N2;X;modal_verb
+auxpass;N1,V,X;N2,V,X LABEL=N1;X;N2;X;passive_supporting_verb
+conj_and;N1,non V,X;N2,non V,X LABEL=N1;X;N2;X;in_conjunction_with
+conj_or;N1,X,X;N2,X,X LABEL=N1;X;N2;X;in_disjunction_with
+dep;N1,X,X;N2,X,X LABEL=N1;X;N2;X;dependent
+goes_with;N1,X,X;N2,X,X LABEL=N1;X;N2;X;complement_word
+number;N1,X,X;N2,X,X LABEL=N1;X;N2;X;complement_word
+preconj;N1,N,X;N2,X,X LABEL=N1;X;N2;X;identifier
+predet;N1,N,X;N2,X,X LABEL=N1;X;N2;X;identifier
+det;N1,N,X;N2,X,X LABEL=N1;X;N2;X;identifier
+punct;N1,X,X;N2,X,X LABEL=N1;X;N2;X;punctuation
+quantmod;N1,X,X;N2,X,X LABEL=N1;X;N2;X;quantity_modifier
+ref;N1,N,X;N2,X,X LABEL=N1;X;N2;X;referent
+vmod;N1,V,X;N2,V,X LABEL=N1;X;N2;X;objective
+//
+//Preposition rules start here
+//prep_by;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_by
+//prep_over;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_over
+prep_following;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_following
+//prep_above;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_above
+prep_across;N1,V,X;N2,N,X LABEL=N1;X;N2;X;destination/location
+prep_across;N1,N,X;N2,N,X LABEL=N1;X;N2;X;prep_across
+prep_along;N1,V,X;N2,N,X LABEL=N1;X;N2;X;location
+prep_along;N1,N,X;N2,N,X LABEL=N1;X;N2;X;prep_along
+prep_atop;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_atop
+//prep_behind;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_behind
+prep_below;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_below
+//prep_beneath;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_beneath
+prep_beside;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_beside
+prep_during;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_during
+//prep_inside;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_inside
+//prep_like;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_like
+prep_near;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_near
+prep_onto;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_onto
+prep_opposite;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_opposite
+prep_outside;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_outside
+prep_toward;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_toward
+prep_under;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_under
+prep_underneath;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_underneath
+prep_in_front_of;N1,X,X;N2,X,X LABEL=N1;X;N2;X;prep_in_front_of
+//
+prep_aboard;N1,V,X;N2,N,X LABEL=N1;X;N2;X;destination
+//prep_after;N1,V,X;N2,V,X LABEL=N1;X;N2;X;previous_event
+prepc_after;N1,V,X;N2,V,X LABEL=N1;X;N2;X;previous_event
+prepc_before;N1,V,X;N2,V,X LABEL=N1;X;N2;X;next_event
+prepc_before;N1,V,X;N2,V,X LABEL=N1;X;N2;X;next_event
+//prep_for;N1,V,X;N2,V,X LABEL=N1;X;N2;X;objective
+prepc_for;N1,V,X;N2,V,X LABEL=N1;X;N2;X;objective
+//prep_for;N1,V,X;N2,N,X LABEL=N1;X;N2;X;beneficiary
+prepc_for;N1,V,X;N2,N,X LABEL=N1;X;N2;X;beneficiary
+//prep_about;N1,V,X;N2,N,X LABEL=N1;X;N2;X;object
+prep_against;N1,V,X;N2,N,X LABEL=N1;X;N2;X;object
+//prep_through;N1,V,X;N2,N,X LABEL=N1;X;N2;X;object
+//prep_on;N1,V,X;N2,N,X LABEL=N1;X;N2;X;object/location
+prep_out_of;N1,V,X;N2,N,X LABEL=N1;X;N2;X;object
+//prep_of;N1,V,X;N2,N,X LABEL=N1;X;N2;X;object
+//prep_of;N1,N,non person;N2,N,X LABEL=N1;X;N2;X;is_possessed_by
+//prep_of;N1,N,person;N2,N,X LABEL=N1;X;N2;X;is_related_to
+//prep_of;N1,N,non person;N2,P,X LABEL=N1;X;N2;X;is_possessed_by
+//prep_of;N1,N,person;N2,P,X LABEL=N1;X;N2;X;is_related_to
+//prep_of;N1,P,person;N2,P,X LABEL=N1;X;N2;X;is_related_to
+//prep_with;N1,V,X;N2,N,non person LABEL=N1;X;N2;X;raw_material
+//prep_with;N1,V,X;N2,N,person LABEL=N1;X;N2;X;accompanier
+//prep_with;N1,N,X;N2,N,X LABEL=N1;X;N2;X;has_part
+//prep_in;N1,V,X;N2,N,X LABEL=N1;X;N2;X;destination/time_at
+//prep_into;N1,V,X;N2,N,X LABEL=N1;X;N2;X;destination
+//prep_to;N1,V,X;N2,N,X LABEL=N1;X;N2;X;destination
+prep_aboard;N1,V,X;N2,N,X LABEL=N1;X;N2;X;destination
+//prep_at;N1,V,X;N2,N,X LABEL=N1;X;N2;X;site/location/time_at
+//prep_from;N1,V,X;N2,N,X LABEL=N1;X;N2;X;origin

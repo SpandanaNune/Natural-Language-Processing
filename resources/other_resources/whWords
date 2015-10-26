@@ -1,0 +1,20 @@
+\\Format of this file:
+\\WhWord	(\tab)Sense	(\tab)ReplacementWord	(\tab)flagForQuestionMark
+who	person	Who	?
+where	place	Where	?
+why	reason	Why	?
+when	time	When	?
+how	manner	How	?
+what	object, idea or action	ENTITY	.
+which	choice	ENTITY	.
+whose	possession	Whose	?
+whom	object of the verb	Whom	?
+what kind	description	Which	?
+what time	time	When	?
+how many	quantity (countable)	Many	.
+how much	amount, price (uncountable)	Some	.
+how long	duration, length	How long	?
+how often	frequency	Occasionally	?
+how far	distance	Where	?
+how old	age	Old	.
+how come	reason	Why	?

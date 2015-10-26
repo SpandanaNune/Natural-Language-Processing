@@ -1,0 +1,21 @@
+once	previous_event
+since	next_event
+eventhough	inhibited_by
+whereas	inhibited_by
+even as	next_event
+though	next_event
+until	inhibited_by
+where	caused_by
+wherever	inhibited_by
+even if	caused_by
+although	caused_by
+provided that	caused_by
+because	caused_by
+so	causes
+unless	inhibited_by
+.	next_event
+,	next_event
+and	next_event
+but	next_event
+after	previous_event
+before	next_event
