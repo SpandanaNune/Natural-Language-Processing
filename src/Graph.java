@@ -23,7 +23,7 @@ public class Graph {
                     	childNode.relToParent = relationship;
                     	parentNode.addChild(childNode);
                         rootNodes.remove(parentNode);
-                        rootNodes.set(childNodeIndex, parentNode);
+                        rootNodes.add(parentNode);
                     }
                     else{
 		            	childNode = new Node(childName, posMap.get(childName), sentenceNum, relationship);
