@@ -35,7 +35,7 @@ public class RemediaQA {
 			String parentName, childName, relationship, temp;
 			int sentenceNum = 0;
 			
-			Graph graph = new Graph(posMap);
+			SentenceGraph graph = new SentenceGraph(posMap);
 	
 			for(int i = 0; i < list.size(); i++){
 				temp = list.get(i);

@@ -1,80 +1,68 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 
-public class Graph {
-	public List<Node> rootNodes;
-	private HashMap<String, String> posMap;
-	
-	public Graph(HashMap<String, String> posMap){
-		rootNodes = new ArrayList<Node>();
-		this.posMap = posMap;
-	}
-	
-	public void add(String parentName, String relationship, String childName, int sentenceNum){
-		Node parentNode, childNode;
+public abstract class Graph {
+	protected class Node implements Comparable<Node>{
+		public Node parent;
+		public String pos, relToParent, name;
+		public ArrayList<Node> children;
+		public int sentence;
 		
-		if((parentNode = search(parentName)) != null){
-            if((childNode = search(childName)) != null){
-                    int childNodeIndex;
-                    
-                    if((childNodeIndex = Collections.binarySearch(rootNodes, childNode)) > -1){
-                    	childNode.relToParent = relationship;
-                    	parentNode.addChild(childNode);
-                        rootNodes.remove(parentNode);
-                        rootNodes.add(parentNode);
-                    }
-                    else{
-		            	childNode = new Node(childName, posMap.get(childName), sentenceNum, relationship);
-						childNode.parent = parentNode;
+		public Node(String name, String pos, int sentence, String relToParent){
+			this.name = name;
+			this.pos = pos;
+			this.sentence = sentence;
+			this.relToParent = relToParent;
+			children = new ArrayList<Node>();
+		}
+		
+		public void addChild(Node childNode){
+			children.add(childNode);
+		}
+		
+		public Node hasDescendent(String descName){
+			Node retVal = null;
+			
+			for(Node child : children){
+				if(child.name.equals(descName)){
+					return child;
+				}
+				else{
+					retVal = child.hasDescendent(descName);
 					
-						parentNode.addChild(childNode);
-                    }
-            }
-            else{
-            	childNode = new Node(childName, posMap.get(childName), sentenceNum, relationship);
-				childNode.parent = parentNode;
-			
-				parentNode.addChild(childNode);
-            }
-		}
-		else if((childNode = search(childName)) != null){
-			int childNodeIndex;
-			parentNode = new Node(parentName, posMap.get(parentName), sentenceNum, relationship);
-			
-			if((childNodeIndex = Collections.binarySearch(rootNodes, childNode)) != -1){
-				parentNode.addChild(childNode);
-				rootNodes.set(childNodeIndex, parentNode);
-			}
-		}
-		else{
-			parentNode = new Node(parentName, posMap.get(parentName), sentenceNum, null);
-			childNode = new Node(childName, posMap.get(parentName), sentenceNum, relationship);
-			
-			childNode.parent = parentNode;
-			parentNode.addChild(childNode);
-			
-			rootNodes.add(parentNode);
-		}
-	}
-	
-	private Node search(String name){
-		Node retVal = null;
-		
-		for(Node rootNode : rootNodes){
-			if(rootNode.name.equals(name)){
-				return rootNode;
-			}
-			else{
-				retVal = rootNode.hasDescendent(name);
-				
-				if(retVal != null){
-					return retVal;
+					if(retVal != null){
+						return retVal;
+					}
 				}
 			}
+			
+			return retVal;
 		}
 		
-		return retVal;
+		public boolean hasChildren(){
+			return children.size() > 0;
+		}
+		
+		@Override
+		public String toString(){
+			/*
+			 * Indentation not correct!!!!
+			 */
+			/*StringBuilder sb = new StringBuilder();
+			sb.append(String.format("(%s: (POS-%s, REL-%s))", name, pos, relToParent));
+			
+			for(Node child : children){
+				sb.append(String.format("\n\t%s", child));
+			}
+			
+			return sb.toString();*/
+			
+			return name;
+		}
+
+		@Override
+		public int compareTo(Node o) {
+			return name.compareTo(o.name);
+		}
 	}
+
 }
