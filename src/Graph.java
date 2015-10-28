@@ -7,11 +7,28 @@ public abstract class Graph {
 		rootNodes = new TreeSet<Node>();
 	}
 	
+	@Override
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		
+		for(Node rootNode : rootNodes){
+			sb.append(String.format("%s\n\n", rootNode));
+		}
+		
+		return sb.toString();
+	}
+	
+	protected void calculateDistancesToRoot(){
+		for(Node rootNode : rootNodes){
+			rootNode.calculateDistancesToRoot();
+		}
+	}
+	
 	protected class Node implements Comparable<Node>{
 		public Node parent;
 		public String pos, relToParent, name;
 		public TreeSet<Node> children;
-		public int sentence;
+		public int sentence, distanceToRoot;
 		public boolean root;
 		
 		public Node(String name, String pos, int sentence, String relToParent){
@@ -20,6 +37,7 @@ public abstract class Graph {
 			this.sentence = sentence;
 			this.relToParent = relToParent;
 			children = new TreeSet<Node>();
+			distanceToRoot = Integer.MAX_VALUE;
 			
 			if(relToParent == null){
 				root = true;
@@ -98,26 +116,40 @@ public abstract class Graph {
 			return children.size() > 0;
 		}
 		
+		
 		@Override
 		public String toString(){
-			/*
-			 * Indentation not correct!!!!
-			 */
-			/*StringBuilder sb = new StringBuilder();
-			sb.append(String.format("(%s: (POS-%s, REL-%s))", name, pos, relToParent));
+			StringBuilder sb = new StringBuilder();
 			
-			for(Node child : children){
-				sb.append(String.format("\n\t%s", child));
+			for(int i = 0; i < distanceToRoot; i++){
+				sb.append("   ");
 			}
 			
-			return sb.toString();*/
+			sb.append(String.format("%d - %s | %s\n", distanceToRoot, name, relToParent));
 			
-			return name;
+			for(Node child : children){
+				sb.append(String.format("%s", child));
+			}
+			
+			return sb.toString();
 		}
 
 		@Override
 		public int compareTo(Node o) {
 			return name.compareTo(o.name);
+		}
+		
+		private void calculateDistancesToRoot(){
+			if(root){
+				distanceToRoot = 0;
+			}
+			else{
+				distanceToRoot = parent.distanceToRoot + 1;
+			}
+			
+			for(Node child : children){
+				child.calculateDistancesToRoot();
+			}
 		}
 	}
 	
@@ -143,6 +175,14 @@ public abstract class Graph {
 		
 		public boolean childFound(){
 			return child != null;
+		}
+		
+		@Override
+		public String toString(){
+			String parentString = parentFound() ? parent.name : "null",
+					childString = childFound() ? child.name : "null";
+			
+			return String.format("Parent: %s\nChild: %s\n", parentString, childString);
 		}
 	}
 

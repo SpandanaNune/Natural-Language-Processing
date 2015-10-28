@@ -74,6 +74,8 @@ public class SentenceGraph extends Graph {
 				rootNodes.add(parentNode);
 			}
 		}
+		
+		calculateDistancesToRoot();
 	}
 	
 	private SearchResult search(String parentName, String childName){
