@@ -1,78 +1,108 @@
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 public class SentenceGraph extends Graph {
-	public List<Node> rootNodes;
 	private HashMap<String, String> posMap;
 	
 	public SentenceGraph(HashMap<String, String> posMap){
-		rootNodes = new ArrayList<Node>();
+		super();
 		this.posMap = posMap;
 	}
 	
 	public void add(String parentName, String relationship, String childName, int sentenceNum){
-		Node parentNode, childNode;
+		SearchResult searchResult = search(parentName, childName);
+		Node childNode, parentNode;
 		
-		if((parentNode = search(parentName)) != null){
-            if((childNode = search(childName)) != null){
-                    if(Collections.binarySearch(rootNodes, childNode) > -1){
-                    	childNode.relToParent = relationship;
-                    	parentNode.addChild(childNode);
-                        rootNodes.remove(parentNode);
-                        rootNodes.add(parentNode);
-                    }
-                    else{
-		            	childNode = new Node(childName, posMap.get(childName), sentenceNum, relationship);
-						childNode.parent = parentNode;
-					
-						parentNode.addChild(childNode);
-                    }
-            }
-            else{
-            	childNode = new Node(childName, posMap.get(childName), sentenceNum, relationship);
-				childNode.parent = parentNode;
+		if(searchResult.noneFound()){
+			parentNode = new Node(parentName, posMap.get(parentName), sentenceNum, null);
+			childNode = new Node(childName, posMap.get(childName), sentenceNum, relationship);
 			
-				parentNode.addChild(childNode);
-            }
+			parentNode.addChild(childNode, relationship);
+			rootNodes.add(parentNode);
 		}
-		else if((childNode = search(childName)) != null){
-			int childNodeIndex;
-			parentNode = new Node(parentName, posMap.get(parentName), sentenceNum, relationship);
+		else if(searchResult.bothFound()){
+			parentNode = searchResult.parent;
+			childNode = searchResult.child;
 			
-			if((childNodeIndex = Collections.binarySearch(rootNodes, childNode)) != -1){
-				parentNode.addChild(childNode);
-				rootNodes.set(childNodeIndex, parentNode);
+			if(parentNode.root && childNode.root){
+				rootNodes.remove(childNode);
+				parentNode.addChild(childNode, relationship);
+			}
+			else if(!parentNode.root && childNode.root){
+				parentNode.makeRoot();
+				parentNode.addChild(childNode, relationship);
+
+				rootNodes.remove(childNode);
+				rootNodes.add(parentNode);
+			}
+			else if(parentNode.root && !childNode.root){
+				//double check
+				parentNode.addChild(childNode, relationship);
+			}
+			else{
+				//double check
+				parentNode.addChild(childNode, relationship);
+			}
+		}
+		else if(searchResult.parentFound()){
+			childNode = new Node(childName, posMap.get(childName), sentenceNum, relationship);
+			parentNode = searchResult.parent;
+			
+			if(parentNode.root){
+				//double check
+				parentNode.addChild(childNode, relationship);
+			}
+			else{
+				//double check
+				parentNode.addChild(childNode, relationship);
 			}
 		}
 		else{
+			childNode = searchResult.child;
 			parentNode = new Node(parentName, posMap.get(parentName), sentenceNum, null);
-			childNode = new Node(childName, posMap.get(parentName), sentenceNum, relationship);
-			
-			childNode.parent = parentNode;
-			parentNode.addChild(childNode);
-			
-			rootNodes.add(parentNode);
+
+			if(childNode.root){
+				parentNode.makeRoot();
+				parentNode.addChild(childNode, relationship);
+
+				rootNodes.remove(childNode);
+				rootNodes.add(parentNode);
+			}
+			else{
+				parentNode.makeRoot();
+				parentNode.addChild(childNode, relationship);
+				
+				rootNodes.add(parentNode);
+			}
 		}
 	}
 	
-	private Node search(String name){
-		Node retVal = null;
-		
+	private SearchResult search(String parentName, String childName){
+		SearchResult result = new SearchResult();
+
 		for(Node rootNode : rootNodes){
-			if(rootNode.name.equals(name)){
-				return rootNode;
-			}
-			else{
-				retVal = rootNode.hasDescendent(name);
+			if(rootNode.name.equals(childName)){
+				result.child = rootNode;
 				
-				if(retVal != null){
-					return retVal;
+				if(!result.parentFound()){
+					result.parent = rootNode.hasDescendent(parentName);
 				}
+			}
+			else if(rootNode.name.equals(parentName)){
+				result.parent = rootNode;
+				
+				if(!result.childFound()){
+					result.child = rootNode.hasDescendent(childName);
+				}
+			}
+			else if(result.noneFound()){
+				result = rootNode.hasDescendents(parentName, childName);
+			}
+			
+			if(result.bothFound()){
+				break;
 			}
 		}
 		
-		return retVal;
+		return result;
 	}
 }

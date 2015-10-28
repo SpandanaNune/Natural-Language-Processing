@@ -1,7 +1,6 @@
 import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +17,8 @@ public class RemediaQA {
 				+ "As a boy, Chris lived in a pretty home called Cotchfield Farm.  When Chris was three years old, his father wrote a poem about him.  The poem was printed in a magazine for others to read."
 				+ " Mr. Robin then wrote a book.  He made up a fairy tale land where Chris lived.  His friends were animals.  There was a bear called Winnie the Pooh.  There was also an owl and a young pig, called a piglet.  All the animals were stuffed toys that Chris owned.  Mr. Robin made them come to life with his words.  The places in the story were all near Cotchfield Farm. "
 				+ "Winnie the Pooh was written in 1925.  Children still love to read about Christopher Robin and his animal friends.  Most people don't know he is a real person who is grown now.  He has written two books of his own.  They tell what it is like to be famous.";
+		
+		testParagraph = "Why did David Koresh ask the FBI for a word processor?";
 		
 		Reader reader = new StringReader(testParagraph);
 		DocumentPreprocessor dp = new DocumentPreprocessor(reader);
@@ -46,6 +47,8 @@ public class RemediaQA {
 	
 				graph.add(parentName, relationship, childName, sentenceNum);
 			}
+			
+			System.out.println(graph);
 		}
 	}
 }
