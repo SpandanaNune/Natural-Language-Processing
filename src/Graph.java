@@ -37,7 +37,7 @@ public abstract class Graph {
 			this.sentence = sentence;
 			this.relToParent = relToParent;
 			children = new TreeSet<Node>();
-			distanceToRoot = Integer.MAX_VALUE;
+			distanceToRoot = 0;
 			
 			if(relToParent == null){
 				root = true;
@@ -65,24 +65,29 @@ public abstract class Graph {
 		
 		public SearchResult hasDescendents(String parentName, String childName){
 			SearchResult result = new SearchResult();
+			boolean searchBoth;
 			
 			for(Node child : children){
+				searchBoth = false;
+				
 				if(child.name.equals(childName)){
 					result.child = child;
-					
-					if(!result.parentFound()){
-						result.parent = child.hasDescendent(parentName);
-					}
 				}
 				else if(child.name.equals(parentName)){
 					result.parent = child;
-
-					if(!result.childFound()){
-						result.child = child.hasDescendent(childName);
-					}
 				}
 				else if(result.noneFound()){
+					searchBoth = true;
 					result = child.hasDescendents(parentName, childName);
+				}
+				
+				if(!searchBoth){
+					if(result.parentFound() && !result.childFound()){
+						result.child = child.hasDescendent(childName);
+					}
+					else if(result.childFound() &&!result.parentFound()){
+						result.parent = child.hasDescendent(parentName);
+					}
 				}
 				
 				if(result.bothFound()){

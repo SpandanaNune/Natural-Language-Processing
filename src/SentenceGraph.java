@@ -80,24 +80,29 @@ public class SentenceGraph extends Graph {
 	
 	private SearchResult search(String parentName, String childName){
 		SearchResult result = new SearchResult();
-
+		boolean searchBoth;
+		
 		for(Node rootNode : rootNodes){
+			searchBoth = false;
+			
 			if(rootNode.name.equals(childName)){
 				result.child = rootNode;
-				
-				if(!result.parentFound()){
-					result.parent = rootNode.hasDescendent(parentName);
-				}
 			}
 			else if(rootNode.name.equals(parentName)){
 				result.parent = rootNode;
-				
-				if(!result.childFound()){
-					result.child = rootNode.hasDescendent(childName);
-				}
 			}
 			else if(result.noneFound()){
+				searchBoth = true;
 				result = rootNode.hasDescendents(parentName, childName);
+			}
+
+			if(!searchBoth){
+				if(result.parentFound() && !result.childFound()){
+					result.child = rootNode.hasDescendent(childName);
+				}
+				else if(result.childFound() &&!result.parentFound()){
+					result.parent = rootNode.hasDescendent(parentName);
+				}
 			}
 			
 			if(result.bothFound()){
