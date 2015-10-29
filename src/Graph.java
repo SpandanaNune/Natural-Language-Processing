@@ -26,7 +26,7 @@ public abstract class Graph {
 	
 	protected class Node implements Comparable<Node>{
 		public Node parent;
-		public String pos, relToParent, name;
+		public String pos, relToParent, name, smallName;
 		public TreeSet<Node> children;
 		public int sentence, distanceToRoot;
 		public boolean root;
@@ -38,6 +38,7 @@ public abstract class Graph {
 			this.relToParent = relToParent;
 			children = new TreeSet<Node>();
 			distanceToRoot = 0;
+			smallName = name.split("-")[0];
 			
 			if(relToParent == null){
 				root = true;
@@ -137,6 +138,18 @@ public abstract class Graph {
 			}
 			
 			return sb.toString();
+		}
+		
+		public int commonChildren(Node otherNode){
+			int numCommon = 0;
+			
+			for(Node child : children){
+				if(otherNode.children.contains(child)){
+					numCommon++;
+				}
+			}
+			
+			return numCommon;
 		}
 
 		@Override
