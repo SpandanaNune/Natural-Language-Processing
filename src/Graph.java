@@ -10,9 +10,12 @@ public abstract class Graph {
 	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
+		int i = 1;
 		
 		for(Node rootNode : rootNodes){
+			sb.append(String.format("Disconnected Sub-graph %d:\n", i));
 			sb.append(String.format("%s\n\n", rootNode));
+			i++;
 		}
 		
 		return sb.toString();
@@ -26,7 +29,7 @@ public abstract class Graph {
 	
 	protected class Node implements Comparable<Node>{
 		public Node parent;
-		public String pos, relToParent, name, smallName;
+		public String pos, relToParent, name, smallName, subclassOf, instanceOf;
 		public TreeSet<Node> children;
 		public int sentence, distanceToRoot;
 		public boolean root;
@@ -36,6 +39,8 @@ public abstract class Graph {
 			this.pos = pos;
 			this.sentence = sentence;
 			this.relToParent = relToParent;
+			subclassOf = null;
+			instanceOf = null;
 			children = new TreeSet<Node>();
 			distanceToRoot = 0;
 			smallName = name.split("-")[0];

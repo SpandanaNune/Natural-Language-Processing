@@ -1,38 +1,30 @@
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
 
 public class GlobalGraph extends Graph {
+	public ArrayList<SentenceGraph> sentences;
+	
 	public GlobalGraph(){
 		super();
+		sentences = new ArrayList<SentenceGraph>();
 	}
 	
 	public GlobalGraph(Collection<SentenceGraph> graphs){
 		for(SentenceGraph graph : graphs){
+			sentences.add(graph);
 			add(graph);
 		}
 	}
 	
 	public void add(SentenceGraph sGraph){
 		for(Node rootNode : sGraph.rootNodes){
-			add(rootNode);
+			if(rootNode.hasChildren()){
+				add(rootNode);
+			}
 		}
 	}
 	
 	private void add(Node nodeToAdd){
-		Hashtable<Integer, Node> commonChildCounts = new Hashtable<Integer, Node>();
-		Node descendant;
-		
-		for(Node rootNode : rootNodes){
-			if(rootNode.smallName.equals(nodeToAdd.smallName)){
-				commonChildCounts.put(rootNode.commonChildren(nodeToAdd), rootNode);
-			}
-			
-			if((descendant = rootNode.hasDescendent(nodeToAdd.smallName)) != null){
-				commonChildCounts.put(descendant.commonChildren(nodeToAdd), descendant);
-			}
-		}
-		for(Node child : nodeToAdd.children){
-			
-		}
+		rootNodes.add(nodeToAdd);
 	}
 }

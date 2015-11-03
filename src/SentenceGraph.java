@@ -2,15 +2,44 @@ import java.util.HashMap;
 
 public class SentenceGraph extends Graph {
 	private HashMap<String, String> posMap;
+	private HashMap<String, Node> entityMap;
+	public String sentence;
 	
 	public SentenceGraph(HashMap<String, String> posMap){
 		super();
 		this.posMap = posMap;
+		this.entityMap = new HashMap<String, Node>();
 	}
 	
-	public void add(String parentName, String relationship, String childName, int sentenceNum){
+	public void add(String parentName, String relationship, String childName, int sentenceNum, String sentence){
 		SearchResult searchResult = search(parentName, childName);
-		Node childNode, parentNode;
+		Node childNode, parentNode ;
+		
+		if(relationship.equals("instance_of") || relationship.equals("is_subclass_of")){
+			if(entityMap.containsKey(parentName)){
+				parentNode = entityMap.get(parentName);
+			}
+			else if(searchResult.parentFound()){
+				parentNode = searchResult.parent;
+				entityMap.put(childName, parentNode);
+			}
+			else{
+				parentNode = new Node(parentName, posMap.get(parentName), sentenceNum, null);
+				entityMap.put(childName, parentNode);
+				rootNodes.add(parentNode);
+			}
+
+	        if(relationship.equals("instance_of")){
+	                parentNode.instanceOf = childName;
+	        }
+	        else if(relationship.equals("is_subclass_of")){
+	                parentNode.subclassOf = childName;
+	        }
+		
+			
+			return;
+		}
+		
 		
 		if(searchResult.noneFound()){
 			parentNode = new Node(parentName, posMap.get(parentName), sentenceNum, null);
@@ -74,7 +103,7 @@ public class SentenceGraph extends Graph {
 				rootNodes.add(parentNode);
 			}
 		}
-		
+
 		calculateDistancesToRoot();
 	}
 	
