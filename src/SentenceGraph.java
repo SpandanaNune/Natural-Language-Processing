@@ -5,13 +5,14 @@ public class SentenceGraph extends Graph {
 	private HashMap<String, Node> entityMap;
 	public String sentence;
 	
-	public SentenceGraph(HashMap<String, String> posMap){
+	public SentenceGraph(HashMap<String, String> posMap, String sentence){
 		super();
 		this.posMap = posMap;
 		this.entityMap = new HashMap<String, Node>();
+		this.sentence = sentence;
 	}
 	
-	public void add(String parentName, String relationship, String childName, int sentenceNum, String sentence){
+	public void add(String parentName, String relationship, String childName, int sentenceNum){
 		SearchResult searchResult = search(parentName, childName);
 		Node childNode, parentNode ;
 		
