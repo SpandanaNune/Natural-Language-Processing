@@ -1,15 +1,4 @@
 import java.io.FileNotFoundException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.process.DocumentPreprocessor;
-import module.graph.SentenceToGraph;
-import module.graph.helper.GraphPassingNode;
 
 public class RemediaQA {
 	public static void main(String[] args) throws FileNotFoundException{
