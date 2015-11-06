@@ -1,5 +1,8 @@
 import java.io.FileNotFoundException;
 
+import graph.GlobalGraph;
+import graph.QuestionGraph;
+
 public class RemediaQA {
 	public static void main(String[] args) throws FileNotFoundException{
 		String testParagraph = "(ENGLAND, June, 1989) - Christopher Robin is alive and well.  He lives in England.  He is the same person that you read about in the book, Winnie the Pooh. "
