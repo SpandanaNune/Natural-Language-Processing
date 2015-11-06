@@ -10,6 +10,8 @@
 //here, N1 and N2 define the node labels of start and end node in final mapping and postfix defines the text after the node label (if no postfix is required then write X)
 cop;N1,J,X;N2,V,X	nsubj;N1,J,X;N3,N,X LABEL=N3;X;N1;X;trait	N2;X;N3;X;agent
 cop;N1,J,X;N2,V,X	nsubj;N1,J,X;N3,P,X LABEL=N3;X;N1;X;trait	N2;X;N3;X;agent
+cop;N1,N,X;N2,V,X	nsubj;N1,N,X;N3,N,X LABEL=N2;X;N3;X;agent	N2;X;N1;X;recipient
+cop;N1,N,X;N2,V,X	nsubj;N1,N,X;N3,P,X LABEL=N2;X;N3;X;agent	N2;X;N1;X;recipient
 cop;N1,N,X;N2,V,X	nsubj;N1,N,X;N3,N,X LABEL=N2;X;N1;X;recipient	N2;X;N3;X;agent
 cop;N1,P,X;N2,V,X	nsubj;N1,P,X;N3,N,X LABEL=N2;X;N1;X;recipient	N2;X;N3;X;agent
 cop;N1,P,X;N2,V,X	nsubj;N1,P,X;N3,P,X LABEL=N2;X;N1;X;recipient	N2;X;N3;X;agent
