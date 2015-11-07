@@ -1,5 +1,7 @@
 package graph;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeSet;
 
 public class Node implements Comparable<Node>{
@@ -14,11 +16,11 @@ public class Node implements Comparable<Node>{
 		this.pos = pos;
 		this.sentence = sentence;
 		this.relToParent = relToParent;
-		subclassOf = null;
-		instanceOf = null;
+		subclassOf = "NO SUBCLASS";
+		instanceOf = "NO INSTANCE";
 		children = new TreeSet<Node>();
 		distanceToRoot = 0;
-		smallName = name.split("-")[0];
+		smallName = name.split("-")[0].toLowerCase();
 		
 		if(relToParent == null){
 			root = true;
@@ -137,6 +139,56 @@ public class Node implements Comparable<Node>{
 		return name.compareTo(o.name);
 	}
 	
+	public int calculateSimilarityScore(Node o){
+		return calculateSimilarityScore(o, 0);
+	}
+	
+	private int calculateSimilarityScore(Node o, int score){
+		HashMap<String, ArrayList<Node>> otherRelations = new HashMap<String, ArrayList<Node>>();
+
+		score += Node.distance(smallName, o.smallName);
+		score += Math.abs(children.size() - o.children.size());
+		
+		if(!instanceOf.equals(o.instanceOf)){
+			score += 1;
+		}
+
+		if(!instanceOf.equals(o.instanceOf)){
+			score += 1;
+		}
+		
+		for(Node oChild : o.children){
+			if(!otherRelations.containsKey(oChild.relToParent)){
+				otherRelations.put(oChild.relToParent, new ArrayList<Node>());
+			}
+			
+			otherRelations.get(oChild.relToParent).add(oChild);
+		}
+
+		for(Node child : children){
+			if(otherRelations.containsKey(child.relToParent)){
+				int min = Integer.MAX_VALUE, temp, minIdx = -1;
+				
+				for(int i = 0; i < otherRelations.get(child.relToParent).size(); i++){
+					Node oChild = otherRelations.get(child.relToParent).get(i);
+					
+					if((temp = child.calculateSimilarityScore(oChild)) < min){
+						min = temp;
+						minIdx = i;
+					}
+				}
+				
+				score += min;
+				otherRelations.get(child.relToParent).remove(minIdx);
+			}
+			else{
+				score += 1;
+			}
+		}
+		
+		return score;
+	}
+	
 	public void calculateDistancesToRoot(){
 		if(root){
 			distanceToRoot = 0;
@@ -150,4 +202,25 @@ public class Node implements Comparable<Node>{
 		}
 	}
 
+	//Levenshtein distanace between strings
+	//From http://rosettacode.org/wiki/Levenshtein_distance#Java
+    private static int distance(String a, String b) {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        // i == 0
+        int [] costs = new int [b.length() + 1];
+        for (int j = 0; j < costs.length; j++)
+            costs[j] = j;
+        for (int i = 1; i <= a.length(); i++) {
+            // j == 0; nw = lev(i - 1, j)
+            costs[0] = i;
+            int nw = i - 1;
+            for (int j = 1; j <= b.length(); j++) {
+                int cj = Math.min(1 + Math.min(costs[j], costs[j - 1]), a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1);
+                nw = costs[j];
+                costs[j] = cj;
+            }
+        }
+        return costs[b.length()];
+    }
 }

@@ -25,7 +25,7 @@ public abstract class Parser {
 		QuestionGraph qGraph = new QuestionGraph(gpn2.getposMap(), question);
 		ArrayList<String> relationList = gpn2.getAspGraph();
 
-		Parser.parse(qGraph, relationList, -1);
+		Parser.parse(qGraph, relationList);
 		
 		return qGraph; 
 	}
@@ -40,10 +40,10 @@ public abstract class Parser {
 		for (List<HasWord> sentenceWordList : dp) {
 			currSentence = Sentence.listToString(sentenceWordList);
 			gpn2 = stg.extractGraph(currSentence,false,true,false);
-			SentenceGraph sGraph = new SentenceGraph(gpn2.getposMap(), currSentence);
+			SentenceGraph sGraph = new SentenceGraph(gpn2.getposMap(), currSentence, sentenceNum);
 			ArrayList<String> relationList = gpn2.getAspGraph();
 	
-			Parser.parse(sGraph, relationList, sentenceNum);
+			Parser.parse(sGraph, relationList);
 			
 			sentenceNum++;
 			gGraph.add(sGraph);
@@ -53,7 +53,7 @@ public abstract class Parser {
 		return gGraph;
 	}
 	
-	private static void parse(SentenceGraph graph, ArrayList<String> relationList, int sentenceNum){
+	private static void parse(SentenceGraph graph, ArrayList<String> relationList){
 		String currRelation, parentName, childName, relationship;
 		String[] elements;
 
@@ -64,7 +64,13 @@ public abstract class Parser {
 			relationship = elements[1];
 			childName = elements[2];
 
-			graph.add(parentName, relationship, childName, sentenceNum);
+			if(graph.getClass() == QuestionGraph.class){
+				QuestionGraph qGraph = (QuestionGraph)graph;
+				qGraph.add(parentName, relationship, childName);
+			}
+			else{
+				graph.add(parentName, relationship, childName);
+			}
 		}
 	}
 	

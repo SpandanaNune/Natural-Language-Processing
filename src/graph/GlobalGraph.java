@@ -19,9 +19,7 @@ public class GlobalGraph extends Graph {
 	
 	public void add(SentenceGraph sGraph){
 		for(Node rootNode : sGraph.rootNodes){
-			if(rootNode.hasChildren()){
-				add(rootNode);
-			}
+			add(rootNode);
 		}
 	}
 	

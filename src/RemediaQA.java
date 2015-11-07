@@ -10,12 +10,20 @@ public class RemediaQA {
 				+ " Mr. Robin then wrote a book.  He made up a fairy tale land where Chris lived.  His friends were animals.  There was a bear called Winnie the Pooh.  There was also an owl and a young pig, called a piglet.  All the animals were stuffed toys that Chris owned.  Mr. Robin made them come to life with his words.  The places in the story were all near Cotchfield Farm. "
 				+ "Winnie the Pooh was written in 1925.  Children still love to read about Christopher Robin and his animal friends.  Most people don't know he is a real person who is grown now.  He has written two books of his own.  They tell what it is like to be famous.";
 		
+		testParagraph = "When Chris was three years old, his father wrote a poem about him.";
+		
 		String testQuestion = "When was Winnie the Pooh written?";
+		
+		testQuestion =  "What did Mr. Robin do when Chris was three years old?";
 		
 		QuestionGraph questionGraph = Parser.parseQuestion(testQuestion);
 		GlobalGraph paragraphGraph = Parser.parseText(testParagraph);
 		
 		System.out.println(String.format("Graph for Test Question:\n\n%s", questionGraph));
 		System.out.println(String.format("Graph for Test Paragraph:\n\n%s", paragraphGraph));
+		
+		QA qa = new QA(questionGraph, paragraphGraph);
+		qa.findAnswer();
+		System.out.println(String.format("Potential Matches:\n%s", qa.potentialAnswers));
 	}
 }
