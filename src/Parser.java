@@ -21,9 +21,9 @@ public abstract class Parser {
 	public static QuestionGraph parseQuestion(String question){
 		init(question);
 
-		gpn2 = stg.extractGraph(question,false,true,false);
+		gpn2 = stg.extractGraph(question,false,true,true);
 		QuestionGraph qGraph = new QuestionGraph(gpn2.getposMap(), question);
-		ArrayList<String> relationList = gpn2.getAspGraph();
+		ArrayList<String> relationList = sortRelations(gpn2.getAspGraph());
 
 		Parser.parse(qGraph, relationList);
 		
@@ -39,9 +39,9 @@ public abstract class Parser {
 
 		for (List<HasWord> sentenceWordList : dp) {
 			currSentence = Sentence.listToString(sentenceWordList);
-			gpn2 = stg.extractGraph(currSentence,false,true,false);
+			gpn2 = stg.extractGraph(currSentence,false,true,true);
 			SentenceGraph sGraph = new SentenceGraph(gpn2.getposMap(), currSentence, sentenceNum);
-			ArrayList<String> relationList = gpn2.getAspGraph();
+			ArrayList<String> relationList = sortRelations(gpn2.getAspGraph());
 	
 			Parser.parse(sGraph, relationList);
 			
@@ -77,5 +77,28 @@ public abstract class Parser {
 	private static void init(String input){
 		reader = new StringReader(input);
 		dp = new DocumentPreprocessor(reader);
+	}
+	
+	private static ArrayList<String> sortRelations(ArrayList<String> relations){
+		ArrayList<String> sortedRelations = new ArrayList<String>(),
+				instanceRelations = new ArrayList<String>(),
+				subclassRelations = new ArrayList<String>();
+		
+		for(String relation : relations){
+			if(relation.contains("instance_of")){
+				instanceRelations.add(relation);
+			}
+			else if(relation.contains("is_subclass_of")){
+				subclassRelations.add(relation);
+			}
+			else{
+				sortedRelations.add(relation);
+			}
+		}
+		
+		sortedRelations.addAll(instanceRelations);
+		sortedRelations.addAll(subclassRelations);
+		
+		return sortedRelations;
 	}
 }
