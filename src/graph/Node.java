@@ -6,28 +6,26 @@ import java.util.TreeSet;
 
 public class Node implements Comparable<Node>{
 	public Node parent;
-	public String pos, relToParent, name, smallName, subclassOf, instanceOf;
+	public String pos, relToParent, name, smallName, originalName, subclassOf, instanceOf;
 	public TreeSet<Node> children;
-	public int sentence, distanceToRoot;
+	public int sentenceNum, distanceToRoot;
 	public boolean root;
 	
-	public Node(String name, String pos, int sentence, String relToParent){
-		this.name = name;
+	public Node(String name, String pos, int sentenceNum, String relToParent){
 		this.pos = pos;
-		this.sentence = sentence;
-		this.relToParent = relToParent;
+		this.sentenceNum = sentenceNum;
 		subclassOf = "NO SUBCLASS";
 		instanceOf = "NO INSTANCE";
 		children = new TreeSet<Node>();
 		distanceToRoot = 0;
-		smallName = name.split("-")[0].toLowerCase();
-		
-		if(relToParent == null){
-			root = true;
-		}
-		else{
-			root = false;
-		}
+		setName(name);
+		setRelToParent(relToParent);
+	}
+	
+	public void setName(String name){
+		this.name = name.toLowerCase();
+		originalName = name;
+		smallName = name.split("-")[0];
 	}
 	
 	public void addChild(Node childNode, String relToParent){
@@ -37,12 +35,23 @@ public class Node implements Comparable<Node>{
 	}
 	
 	public void addParent(Node parentNode, String relToParent){
-		this.relToParent = relToParent;
 		parent = parentNode;
+		setRelToParent(relToParent);
+	}
+	
+	public void setRelToParent(String relToParent){
+		if(relToParent == null || relToParent.isEmpty()){
+			root = true;
+			this.relToParent = "NONE";
+		}
+		else{
+			root = false;
+			this.relToParent = relToParent;
+		}
 	}
 	
 	public void makeRoot(){
-		this.relToParent = null;
+		this.relToParent = "NONE";
 		this.root = true;
 	}
 	
@@ -81,6 +90,16 @@ public class Node implements Comparable<Node>{
 		return result;
 	}
 	
+	public ArrayList<String> relations(){
+		ArrayList<String> retVal = new ArrayList<String>();
+		
+		for(Node child : children){
+			retVal.add(child.relToParent);
+		}
+		
+		return retVal;
+	}
+	
 	public Node hasDescendent(String descName){
 		Node descendent = null;
 		
@@ -113,7 +132,7 @@ public class Node implements Comparable<Node>{
 			sb.append("   ");
 		}
 		
-		sb.append(String.format("%d - %s | %s\n", distanceToRoot, name, relToParent));
+		sb.append(String.format("%d - %s | %s | %s\n", distanceToRoot, name, relToParent, subclassOf));
 		
 		for(Node child : children){
 			sb.append(String.format("%s", child));
@@ -143,50 +162,69 @@ public class Node implements Comparable<Node>{
 		return calculateSimilarityScore(o, 0);
 	}
 	
+	/*
+	 * THE WEIGHT NEEDS TO BE DIFFERENT!
+	 * 
+	 * As it is now, the similarity score is disproportiontely influenced by the levenshtein
+	 * distance between the smallNames of the two nodes. Each difference is given the same
+	 * weight as a difference in the number of relations or the relation to the parent
+	 * for the two nodes.
+	 * 
+	 * Also, taking the minimum score for the comparison between all the nodes is probably not best
+	 * as it does not necessarily lead to the minimum score overall.
+	 */
 	private int calculateSimilarityScore(Node o, int score){
-		HashMap<String, ArrayList<Node>> otherRelations = new HashMap<String, ArrayList<Node>>();
-
-		score += Node.distance(smallName, o.smallName);
-		score += Math.abs(children.size() - o.children.size());
+		HashMap<Node, Integer> similarityScores;
+		ArrayList<Node> usedChildren = new ArrayList<Node>();
+		ArrayList<String> sRelations, lRelations;
+		Node minNode, larger, smaller;
 		
-		if(!instanceOf.equals(o.instanceOf)){
-			score += 1;
-		}
-
-		if(!instanceOf.equals(o.instanceOf)){
-			score += 1;
-		}
+		larger = children.size() >= o.children.size() ? this : o;
+		lRelations = larger.relations();
 		
-		for(Node oChild : o.children){
-			if(!otherRelations.containsKey(oChild.relToParent)){
-				otherRelations.put(oChild.relToParent, new ArrayList<Node>());
+		smaller = o.children.size() <= children.size() ? o : this;
+		sRelations = smaller.relations();
+
+		//Difference in the number of relations 
+		score += Math.abs(lRelations.size() - sRelations.size());
+
+		//Number of changes needed to get from smallName to o.smallName
+		score += distance(smallName, o.smallName);
+		
+		//If relationships to parent are not the same add 1
+		score += relToParent.equals(o.relToParent) ? 0 : 1;
+		
+		for(Node lChild : larger.children){
+			similarityScores = new HashMap<Node, Integer>();
+			
+			for(Node sChild : smaller.children){
+				if(!usedChildren.contains(sChild)){
+					similarityScores.put(sChild, lChild.calculateSimilarityScore(sChild));
+				}
 			}
 			
-			otherRelations.get(oChild.relToParent).add(oChild);
-		}
-
-		for(Node child : children){
-			if(otherRelations.containsKey(child.relToParent)){
-				int min = Integer.MAX_VALUE, temp, minIdx = -1;
-				
-				for(int i = 0; i < otherRelations.get(child.relToParent).size(); i++){
-					Node oChild = otherRelations.get(child.relToParent).get(i);
-					
-					if((temp = child.calculateSimilarityScore(oChild)) < min){
-						min = temp;
-						minIdx = i;
-					}
-				}
-				
-				score += min;
-				otherRelations.get(child.relToParent).remove(minIdx);
-			}
-			else{
-				score += 1;
+			if(similarityScores.size() > 0){
+				minNode = findMinScore(similarityScores);
+				score += similarityScores.get(minNode);
+				usedChildren.add(minNode);
 			}
 		}
 		
 		return score;
+	}
+	
+	public static Node findMinScore(HashMap<Node, Integer> similarityScores){
+		Node minNode = null;
+		int minScore = Integer.MAX_VALUE;
+		
+		for(Node key : similarityScores.keySet()){
+			if(similarityScores.get(key) < minScore){
+				minScore = similarityScores.get(key);
+				minNode = key;
+			}
+		}
+		
+		return minNode;
 	}
 	
 	public void calculateDistancesToRoot(){
@@ -201,8 +239,24 @@ public class Node implements Comparable<Node>{
 			child.calculateDistancesToRoot();
 		}
 	}
+	
+	public boolean containsSubclass(String subclass){
+		boolean ret = false;
+		
+		if(subclassOf.equals(subclass)){
+			ret = true;
+			
+			if(!ret){
+				for(Node child : children){
+					ret = child.containsSubclass(subclass);
+				}
+			}
+		}
+		
+		return ret;
+	}
 
-	//Levenshtein distanace between strings
+	//Levenshtein distance between strings
 	//From http://rosettacode.org/wiki/Levenshtein_distance#Java
     private static int distance(String a, String b) {
         a = a.toLowerCase();

@@ -12,12 +12,14 @@ public class GlobalGraph extends Graph {
 	
 	public GlobalGraph(Collection<SentenceGraph> graphs){
 		for(SentenceGraph graph : graphs){
-			sentences.add(graph);
 			add(graph);
 		}
 	}
 	
 	public void add(SentenceGraph sGraph){
+		sGraph.calculateDistancesToRoot();
+		sentences.add(sGraph);
+
 		for(Node rootNode : sGraph.rootNodes){
 			add(rootNode);
 		}

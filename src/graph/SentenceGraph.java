@@ -1,7 +1,8 @@
 package graph;
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SentenceGraph extends Graph {
+public class SentenceGraph extends Graph{
 	private HashMap<String, String> posMap;
 	private HashMap<String, Node> entityMap;
 	public String sentence;
@@ -16,8 +17,14 @@ public class SentenceGraph extends Graph {
 	}
 	
 	public void add(String parentName, String relationship, String childName){
-		SearchResult searchResult = search(parentName, childName);
-		Node childNode, parentNode ;
+		SearchResult searchResult = search(parentName.toLowerCase(), childName.toLowerCase());
+		Node childNode, parentNode;
+		
+		if(relationship.equals("has_coreferent")){
+			String newName = childName.replace(":", "");
+			searchResult.parent.setName(newName);
+			return;
+		}
 		
 		if(relationship.equals("instance_of") || relationship.equals("is_subclass_of")){
 			if(entityMap.containsKey(parentName)){
@@ -108,7 +115,7 @@ public class SentenceGraph extends Graph {
 			}
 		}
 
-		calculateDistancesToRoot();
+		//calculateDistancesToRoot();
 	}
 	
 	private SearchResult search(String parentName, String childName){
@@ -144,5 +151,52 @@ public class SentenceGraph extends Graph {
 		}
 		
 		return result;
+	}
+	
+	public boolean containsSubclass(String subclass){
+		boolean ret = false;
+		
+		for(Node rootNode : rootNodes){
+			if(rootNode.subclassOf.equals(subclass)){
+				ret = true;
+			}
+			
+			if(!ret){
+				ret = rootNode.containsSubclass(subclass);
+			}
+			
+			if(ret){
+				break;
+			}
+		}
+		
+		return ret;
+	}
+
+	public int calculateSimilarityScore(SentenceGraph o) {
+		HashMap<Node, Integer> similarityScores;
+		ArrayList<Node> alreadyUsed = new ArrayList<Node>();
+		Node minNode;
+		SentenceGraph larger = rootNodes.size() >= o.rootNodes.size() ? this : o,
+				smaller = o.rootNodes.size() <= rootNodes.size() ? o : this;
+		int score = Math.abs(larger.rootNodes.size() - smaller.rootNodes.size()) * 100;
+		
+		for(Node lRoot : larger.rootNodes){
+			similarityScores = new HashMap<Node, Integer>();
+			
+			for(Node sRoot : smaller.rootNodes){
+				if(!alreadyUsed.contains(sRoot)){
+					similarityScores.put(sRoot, lRoot.calculateSimilarityScore(sRoot));
+				}
+			}
+			
+			if(similarityScores.size() > 0){
+				minNode = Node.findMinScore(similarityScores);
+				score += similarityScores.get(minNode);
+				alreadyUsed.add(minNode);
+			}
+		}
+		
+		return score;
 	}
 }

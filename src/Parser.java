@@ -82,22 +82,35 @@ public abstract class Parser {
 	private static ArrayList<String> sortRelations(ArrayList<String> relations){
 		ArrayList<String> sortedRelations = new ArrayList<String>(),
 				instanceRelations = new ArrayList<String>(),
-				subclassRelations = new ArrayList<String>();
+				subclassRelations = new ArrayList<String>(),
+				coreferences = new ArrayList<String>();
 		
 		for(String relation : relations){
 			if(relation.contains("instance_of")){
-				instanceRelations.add(relation);
+				if(!instanceRelations.contains(relation)){
+					instanceRelations.add(relation);
+				}
 			}
 			else if(relation.contains("is_subclass_of")){
-				subclassRelations.add(relation);
+				if(!subclassRelations.contains(relation)){
+					subclassRelations.add(relation);
+				}
+			}
+			else if(relation.contains("has_coreferent")){
+				if(!coreferences.contains(relation)){
+					coreferences.add(relation);
+				}
 			}
 			else{
-				sortedRelations.add(relation);
+				if(!sortedRelations.contains(relation)){
+					sortedRelations.add(relation);
+				}
 			}
 		}
 		
 		sortedRelations.addAll(instanceRelations);
 		sortedRelations.addAll(subclassRelations);
+		sortedRelations.addAll(coreferences);
 		
 		return sortedRelations;
 	}
