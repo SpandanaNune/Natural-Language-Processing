@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -17,6 +21,8 @@ public abstract class Parser {
 	private static DocumentPreprocessor dp;
 	private static SentenceToGraph stg = new SentenceToGraph();
 	private static GraphPassingNode gpn2;
+	private static GlobalGraph gGraph;
+	private static QuestionGraph[] qGraphs;
 	
 	public static QuestionGraph parseQuestion(String question){
 		init(question);
@@ -28,6 +34,54 @@ public abstract class Parser {
 		Parser.parse(qGraph, relationList);
 		
 		return qGraph; 
+	}
+	
+	public static GlobalGraph getGlobalGraph(){
+		if(gGraph == null){
+			throw new IllegalArgumentException("You must call 'readSetFromFile' before calling this method.");
+		}
+		
+		GlobalGraph retVal = gGraph;
+		gGraph = null;
+		
+		return retVal;
+	}
+	
+	public static QuestionGraph[] getQuestionGraphs(){
+		if(qGraphs == null){
+			throw new IllegalArgumentException("You must call 'readSetFromFile' before calling this method.");
+		}
+		
+		QuestionGraph[] retVal = qGraphs;
+		qGraphs = null;
+
+		return retVal;
+	}
+	
+	public static void readSetFromFile(File file){
+		if(!file.exists()){
+			throw new IllegalArgumentException(String.format("File at '%s' does not exist.", file.getAbsolutePath()));
+		}
+		else if(!getExtension(file.getName()).equals("ser")){
+			throw new IllegalArgumentException("File to read from must have .ser extension.");
+		}
+		
+		
+		
+		try {
+			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			
+			gGraph = (GlobalGraph) ois.readObject();
+			qGraphs= (QuestionGraph[]) ois.readObject();
+			
+			ois.close();
+			fis.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static GlobalGraph parseText(String text){
@@ -114,4 +168,21 @@ public abstract class Parser {
 		
 		return sortedRelations;
 	}
+
+	private static String getExtension(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        int extensionPos = filename.lastIndexOf('.');
+        int lastUnixPos = filename.lastIndexOf('/');
+        int lastWindowsPos = filename.lastIndexOf('\\');
+        int lastSeparator = Math.max(lastUnixPos, lastWindowsPos);
+ 
+        int index = lastSeparator > extensionPos ? -1 : extensionPos;
+        if (index == -1) {
+            return "";
+        } else {
+            return filename.substring(index + 1);
+        }
+    }
 }
