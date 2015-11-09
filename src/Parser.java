@@ -19,7 +19,7 @@ import module.graph.helper.GraphPassingNode;
 public abstract class Parser {
 	private static Reader reader;
 	private static DocumentPreprocessor dp;
-	private static SentenceToGraph stg = new SentenceToGraph();
+	private static SentenceToGraph stg;
 	private static GraphPassingNode gpn2;
 	private static GlobalGraph gGraph;
 	private static QuestionGraph[] qGraphs;
@@ -129,6 +129,10 @@ public abstract class Parser {
 	}
 	
 	private static void init(String input){
+		if(stg == null){
+			stg = new SentenceToGraph();
+		}
+		
 		reader = new StringReader(input);
 		dp = new DocumentPreprocessor(reader);
 	}

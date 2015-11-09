@@ -2,6 +2,7 @@ package graph;
 import java.util.HashMap;
 
 public class QuestionGraph extends SentenceGraph{
+	private static final long serialVersionUID = -2135547892436405158L;
 	public String answerType;
 	
 	public QuestionGraph(HashMap<String, String> posMap, String question) {

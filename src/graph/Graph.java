@@ -1,7 +1,9 @@
 package graph;
+import java.io.Serializable;
 import java.util.TreeSet;
 
-public abstract class Graph {
+public abstract class Graph implements Serializable{
+	private static final long serialVersionUID = 6685982012845283634L;
 	public TreeSet<Node> rootNodes;
 	
 	public Graph(){

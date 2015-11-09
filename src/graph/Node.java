@@ -1,10 +1,12 @@
 package graph;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-public class Node implements Comparable<Node>{
+public class Node implements Comparable<Node>, Serializable{
+	private static final long serialVersionUID = -7290263771084961128L;
 	public Node parent;
 	public String pos, relToParent, name, smallName, originalName, subclassOf, instanceOf;
 	public TreeSet<Node> children;
@@ -175,6 +177,7 @@ public class Node implements Comparable<Node>{
 	 */
 	private int calculateSimilarityScore(Node o, int score){
 		HashMap<Node, Integer> similarityScores;
+		int distance;
 		ArrayList<Node> usedChildren = new ArrayList<Node>();
 		ArrayList<String> sRelations, lRelations;
 		Node minNode, larger, smaller;
@@ -189,8 +192,16 @@ public class Node implements Comparable<Node>{
 		score += Math.abs(lRelations.size() - sRelations.size());
 
 		//Number of changes needed to get from smallName to o.smallName
-		score += distance(smallName, o.smallName);
+		distance = distance(smallName, o.smallName);
 		
+		if(distance == 0 && root && o.root){
+			score -= 100;
+		}
+		else{
+			score += distance;
+		}
+		
+
 		//If relationships to parent are not the same add 1
 		score += relToParent.equals(o.relToParent) ? 0 : 1;
 		

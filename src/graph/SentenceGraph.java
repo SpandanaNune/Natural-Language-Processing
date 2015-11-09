@@ -1,8 +1,10 @@
 package graph;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SentenceGraph extends Graph{
+public class SentenceGraph extends Graph implements Serializable{
+	private static final long serialVersionUID = 1106842163611517027L;
 	private HashMap<String, String> posMap;
 	private HashMap<String, Node> entityMap;
 	public String sentence;

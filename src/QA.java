@@ -34,7 +34,7 @@ public class QA {
 			index++;
 			ArrayList<SentenceGraph> graphs = sentenceScores.get(key);
 			for(SentenceGraph graph : graphs){
-				System.out.println(String.format("GRAPH RANK %d\n%d: %s\n\n", index, key, graph));
+				System.out.println(String.format("GRAPH RANK %d\n%d: %s\n\n", index, key, graph.sentence));
 			}
 		}
 	}
@@ -45,7 +45,7 @@ public class QA {
 		
 		for(SentenceGraph sGraph : gGraph.sentences){
 			score = qGraph.calculateSimilarityScore(sGraph);
-			score = sGraph.containsSubclass(qGraph.answerType) ? Math.max(0, score - 200) : score;
+			score = sGraph.containsSubclass(qGraph.answerType) ? score - 100 : score;
 			
 			if(!sentenceScores.containsKey(score)){
 				sentenceScores.put(score, new ArrayList<SentenceGraph>());
