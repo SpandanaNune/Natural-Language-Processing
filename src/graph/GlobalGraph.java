@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class GlobalGraph extends Graph {
+	private static final long serialVersionUID = -2762101244064956520L;
 	public ArrayList<SentenceGraph> sentences;
 	
 	public GlobalGraph(){
