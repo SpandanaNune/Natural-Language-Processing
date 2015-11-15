@@ -20,32 +20,32 @@ public class QA {
 	
 	public void findAnswer(){
 		//findPotentialAnswers();
-		HashMap<Integer, ArrayList<SentenceGraph>> sentenceScores = rankSentences();
-		ArrayList<Integer> sortedKeys = new ArrayList<Integer>();
+		HashMap<Double, ArrayList<SentenceGraph>> sentenceScores = rankSentences();
+		ArrayList<Double> sortedKeys = new ArrayList<Double>();
 		int index = 0;
 		
-		for(int key : sentenceScores.keySet()){
+		for(double key : sentenceScores.keySet()){
 			sortedKeys.add(key);
 		}
 		
 		Collections.sort(sortedKeys);
 		
-		for(int key : sortedKeys){
+		for(double key : sortedKeys){
 			index++;
 			ArrayList<SentenceGraph> graphs = sentenceScores.get(key);
 			for(SentenceGraph graph : graphs){
-				System.out.println(String.format("GRAPH RANK %d\n%d: %s\n\n", index, key, graph.sentence));
+				System.out.println(String.format("GRAPH RANK %d\n%.2f: %s\n\n", index, key, graph.sentence));
 			}
 		}
 	}
 	
-	public HashMap<Integer, ArrayList<SentenceGraph>> rankSentences(){
-		HashMap<Integer, ArrayList<SentenceGraph>> sentenceScores = new HashMap<Integer, ArrayList<SentenceGraph>>();
-		int score;
+	public HashMap<Double, ArrayList<SentenceGraph>> rankSentences(){
+		HashMap<Double, ArrayList<SentenceGraph>> sentenceScores = new HashMap<Double, ArrayList<SentenceGraph>>();
+		double score;
 		
 		for(SentenceGraph sGraph : gGraph.sentences){
 			score = qGraph.calculateSimilarityScore(sGraph);
-			score = sGraph.containsSubclass(qGraph.answerType) ? score - 100 : score;
+			score = sGraph.containsSubclass(qGraph.answerType) ? score - .1 : score;
 			
 			if(!sentenceScores.containsKey(score)){
 				sentenceScores.put(score, new ArrayList<SentenceGraph>());
@@ -79,10 +79,6 @@ public class QA {
 		for(Node childNode : node.children){
 			findPotentialAnswers(childNode);
 		}
-	}
-	
-	private void rankPotentialAnswers(){
-		
 	}
 	
 	private void addToPotentialAnswers(Node node){

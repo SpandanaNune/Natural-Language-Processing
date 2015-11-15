@@ -256,11 +256,11 @@ public class Node implements Comparable<Node>, Serializable{
 		
 		if(subclassOf.equals(subclass)){
 			ret = true;
-			
-			if(!ret){
-				for(Node child : children){
-					ret = child.containsSubclass(subclass);
-				}
+		}
+
+		if(!ret){
+			for(Node child : children){
+				ret = child.containsSubclass(subclass);
 			}
 		}
 		
