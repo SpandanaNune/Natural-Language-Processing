@@ -1,10 +1,13 @@
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
@@ -19,8 +22,8 @@ import module.graph.helper.GraphPassingNode;
 public abstract class Parser {
 	private static Reader reader;
 	private static DocumentPreprocessor dp;
-	private static SentenceToGraph stg;
-	private static GraphPassingNode gpn2;
+	private static SentenceToGraph stg = new SentenceToGraph();
+	private static GraphPassingNode gpn2 = stg.extractGraph("Initializing Parser", false, true, true);
 	private static GlobalGraph gGraph;
 	private static QuestionGraph[] qGraphs;
 	
@@ -66,8 +69,6 @@ public abstract class Parser {
 			throw new IllegalArgumentException("File to read from must have .ser extension.");
 		}
 		
-		
-		
 		try {
 			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
 			ObjectInputStream ois = new ObjectInputStream(fis);
@@ -87,24 +88,82 @@ public abstract class Parser {
 	public static GlobalGraph parseText(String text){
 		init(text);
 		
-		GlobalGraph gGraph = new GlobalGraph();
 		int sentenceNum = 0;
-		String currSentence;
+		GlobalGraph gGraph = new GlobalGraph();
+		String currSentence, modifiedSentence;
+		ArrayList<String> relationList;
+		SentenceGraph sGraph;
+		ByteArrayOutputStream baos= new ByteArrayOutputStream();
+		PrintStream stdout = System.out;
+		System.setOut(new PrintStream(baos));
 
 		for (List<HasWord> sentenceWordList : dp) {
-			currSentence = Sentence.listToString(sentenceWordList);
+			currSentence = sanitizeSentence(Sentence.listToString(sentenceWordList));
 			gpn2 = stg.extractGraph(currSentence,false,true,true);
-			SentenceGraph sGraph = new SentenceGraph(gpn2.getposMap(), currSentence, sentenceNum);
-			ArrayList<String> relationList = sortRelations(gpn2.getAspGraph());
-	
-			Parser.parse(sGraph, relationList);
+			
+			modifiedSentence = baos.toString().split("\n")[0].replace("Modified:", "").trim();
+			/*
+			sGraph = new SentenceGraph(gpn2.getposMap(), currSentence, sentenceNum);
+			relationList = sortRelations(gpn2.getAspGraph());
+			*/
+
+			stdout.println("Sentence from kparser: " + modifiedSentence);
+			modifiedSentence = processSentence(modifiedSentence, gpn2.getposMap(), gpn2.getWordSenseMap());
+			stdout.println("Modified Sentence: " + modifiedSentence + "\n");
+
+			//parse(sGraph, relationList);
 			
 			sentenceNum++;
-			gGraph.add(sGraph);
+			//gGraph.add(sGraph);
+			baos.reset();
 		}
 		
+		System.setOut(stdout);
 		
 		return gGraph;
+	}
+	
+	private static String sanitizeSentence(String sentence){
+		String[] titles = {"Mr.", "Mrs.", "Ms.", "Dr."};
+
+		for(String title : titles){
+			if(sentence.contains(title)){
+				if(title.equals("Mr.")){
+					sentence = sentence.replace(title, "Mister");
+				}
+				else if(title.equals("Mrs.")){
+					sentence = sentence.replace(title, "Missus");
+				}
+				else if(title.equals("Ms.")){
+					sentence = sentence.replace(title, "Miss");
+				}
+				else{
+					sentence = sentence.replace(title, "Doctor");
+				}
+			}
+		}
+		
+		return sentence;
+	}
+	
+	private static String processSentence(String sentence, HashMap<String, String> posMap, HashMap<String, ArrayList<String>> wsMap){
+		StringBuilder output = new StringBuilder();
+		String[] words = sentence.split(" ");
+		String word;
+
+		for(int i = 0; i < words.length; i++){
+			word = words[i].trim();
+			
+			if(word.contains("_")){
+				output.append(word.replace("_", " ") + " ");
+			}
+			else{
+				output.append(word + " ");
+			}
+		}
+
+
+		return output.toString().substring(0, output.length() - 1);
 	}
 	
 	private static void parse(SentenceGraph graph, ArrayList<String> relationList){
@@ -129,10 +188,6 @@ public abstract class Parser {
 	}
 	
 	private static void init(String input){
-		if(stg == null){
-			stg = new SentenceToGraph();
-		}
-		
 		reader = new StringReader(input);
 		dp = new DocumentPreprocessor(reader);
 	}
