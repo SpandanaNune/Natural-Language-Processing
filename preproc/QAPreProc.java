@@ -14,20 +14,22 @@ import graph.QuestionGraph;
 
 public class QAPreProc {
 	private static final int MAX_LEVEL = 5;
+	private static final String OUT_DIR = "all-remedia-processed-pronoun-replace",
+			IN_DIR = "all-remedia";
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException{
 		String path;
 		File dir;
 		File[] dirListing;
 		for(int i = 2; i < MAX_LEVEL + 1; i++){
-			path = String.format("all-remedia/level%d/org/", i);
+			path = String.format("%s/level%d/org/", IN_DIR, i);
 
 			dir = new File(path);
 			dirListing = dir.listFiles();
 			
 			for(int j = 0; j < dirListing.length; j++){
 				File file = dirListing[j],
-						outFile = new File(String.format("all-remedia-processed/level%d/%s", i, file.getName().replace(".txt", ".ser")));
+						outFile = new File(String.format("%s/level%d/%s", OUT_DIR, i, file.getName().replace(".txt", ".ser")));
 				if(getExtension(file.getName()).equals("txt") && !outFile.exists()){
 					System.out.println(String.format("\n\nCURRENT LEVEL: %d\nCURRENT FILE INDEX: %d\nCURRENT FILE: %s\n\n", i, (j-2), file.getAbsolutePath()));
 					
@@ -40,6 +42,7 @@ public class QAPreProc {
 						Files.delete(p);
 					}
 				}
+
 			}
 		}
 	}
@@ -62,6 +65,7 @@ public class QAPreProc {
 
 			lineIdx = 0;
 			line = lines.next();
+			line = line.replace("\t", "");
 			
 			if(line.length() > 2 && line.charAt(0) == '1' && line.charAt(1) == '.'){
 				questions = true;
@@ -78,7 +82,25 @@ public class QAPreProc {
 				questionList.add(line.substring(lineIdx + 1).trim());
 			}
 			else{
-				text += line;
+				if(lineNum == 4){
+					String[] parts = line.split("\\)", 2);
+					String part2;
+					
+					text += " " + parts[0].trim() + "). ";
+					part2 = parts[1].trim();
+					
+					if(part2.substring(0, 2).equals("- ")){
+						part2 = part2.substring(2);
+					}
+					
+					text += part2;
+
+				}
+				else{
+					text += line;
+				}
+				
+				lineNum++;
 			}
 		}
 		
@@ -108,7 +130,7 @@ public class QAPreProc {
 	
 	private static void parseAndWrite(String text, ArrayList<String> questionList, String filename, int level) throws IOException, ClassNotFoundException{
 		filename = filename.replace(".txt", ".ser");
-		String path = String.format("all-remedia-processed/level%d/%s", level, filename);
+		String path = String.format("%s/level%d/%s", OUT_DIR, level, filename);
 		
 		FileOutputStream fos = new FileOutputStream(path);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
