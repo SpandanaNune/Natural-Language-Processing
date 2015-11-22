@@ -295,6 +295,13 @@ public class SentenceGraph extends Graph{
 
 		return totalScores.size() == 0 ? 0 : Collections.min(totalScores);
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		SentenceGraph oGraph = (SentenceGraph) o;
+		
+		return sentence.equals(oGraph.sentence);
+	}
 
 
 	//Setters & Getters
