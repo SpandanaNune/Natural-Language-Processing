@@ -2,8 +2,11 @@ package graph;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.TreeSet;
+
+import graph.Node.SimilarityScores;
 
 public class Node implements Comparable<Node>, Serializable{
 	private static final long serialVersionUID = -7290263771084961128L;
@@ -12,7 +15,7 @@ public class Node implements Comparable<Node>, Serializable{
 	public TreeSet<Node> children;
 	public int sentenceNum, distanceToRoot;
 	public boolean root;
-	
+
 	public Node(String name, String pos, int sentenceNum, String relToParent){
 		this.pos = pos;
 		this.sentenceNum = sentenceNum;
@@ -23,24 +26,24 @@ public class Node implements Comparable<Node>, Serializable{
 		setName(name);
 		setRelToParent(relToParent);
 	}
-	
+
 	public void setName(String name){
 		this.name = name.toLowerCase();
 		originalName = name;
 		smallName = name.split("-")[0];
 	}
-	
+
 	public void addChild(Node childNode, String relToParent){
 		children.add(childNode);
 		childNode.addParent(this, relToParent);
 		childNode.root = false;
 	}
-	
+
 	public void addParent(Node parentNode, String relToParent){
 		parent = parentNode;
 		setRelToParent(relToParent);
 	}
-	
+
 	public void setRelToParent(String relToParent){
 		if(relToParent == null || relToParent.isEmpty()){
 			root = true;
@@ -51,19 +54,19 @@ public class Node implements Comparable<Node>, Serializable{
 			this.relToParent = relToParent;
 		}
 	}
-	
+
 	public void makeRoot(){
 		this.relToParent = "NONE";
 		this.root = true;
 	}
-	
+
 	public SearchResult hasDescendents(String parentName, String childName){
 		SearchResult result = new SearchResult();
 		boolean searchBoth;
-		
+
 		for(Node child : children){
 			searchBoth = false;
-			
+
 			if(child.name.equals(childName)){
 				result.child = child;
 			}
@@ -74,7 +77,7 @@ public class Node implements Comparable<Node>, Serializable{
 				searchBoth = true;
 				result = child.hasDescendents(parentName, childName);
 			}
-			
+
 			if(!searchBoth){
 				if(result.parentFound() && !result.childFound()){
 					result.child = child.hasDescendent(childName);
@@ -83,28 +86,28 @@ public class Node implements Comparable<Node>, Serializable{
 					result.parent = child.hasDescendent(parentName);
 				}
 			}
-			
+
 			if(result.bothFound()){
 				break;
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	public ArrayList<String> relations(){
 		ArrayList<String> retVal = new ArrayList<String>();
-		
+
 		for(Node child : children){
 			retVal.add(child.relToParent);
 		}
-		
+
 		return retVal;
 	}
-	
+
 	public Node hasDescendent(String descName){
 		Node descendent = null;
-		
+
 		for(Node child : children){
 			if(child.name.equals(descName)){
 				descendent = child;
@@ -117,41 +120,41 @@ public class Node implements Comparable<Node>, Serializable{
 				break;
 			}
 		}
-		
+
 		return descendent;
 	}
-	
+
 	public boolean hasChildren(){
 		return children.size() > 0;
 	}
-	
-	
+
+
 	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
-		
+
 		for(int i = 0; i < distanceToRoot; i++){
 			sb.append("   ");
 		}
-		
+
 		sb.append(String.format("%d - %s | %s | %s\n", distanceToRoot, name, relToParent, subclassOf));
-		
+
 		for(Node child : children){
 			sb.append(String.format("%s", child));
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public int commonChildren(Node otherNode){
 		int numCommon = 0;
-		
+
 		for(Node child : children){
 			if(otherNode.children.contains(child)){
 				numCommon++;
 			}
 		}
-		
+
 		return numCommon;
 	}
 
@@ -159,11 +162,11 @@ public class Node implements Comparable<Node>, Serializable{
 	public int compareTo(Node o) {
 		return name.compareTo(o.name);
 	}
-	
+
 	public int calculateSimilarityScore(Node o){
 		return calculateSimilarityScore(o, 0);
 	}
-	
+
 	/*
 	 * THE WEIGHT NEEDS TO BE DIFFERENT!
 	 * 
@@ -181,10 +184,10 @@ public class Node implements Comparable<Node>, Serializable{
 		ArrayList<Node> usedChildren = new ArrayList<Node>();
 		ArrayList<String> sRelations, lRelations;
 		Node minNode, larger, smaller;
-		
+
 		larger = children.size() >= o.children.size() ? this : o;
 		lRelations = larger.relations();
-		
+
 		smaller = o.children.size() <= children.size() ? o : this;
 		sRelations = smaller.relations();
 
@@ -193,51 +196,51 @@ public class Node implements Comparable<Node>, Serializable{
 
 		//Number of changes needed to get from smallName to o.smallName
 		distance = distance(smallName, o.smallName);
-		
+
 		if(distance == 0 && root && o.root){
 			score -= 100;
 		}
 		else{
 			score += distance;
 		}
-		
+
 
 		//If relationships to parent are not the same add 1
 		score += relToParent.equals(o.relToParent) ? 0 : 1;
-		
+
 		for(Node lChild : larger.children){
 			similarityScores = new HashMap<Node, Integer>();
-			
+
 			for(Node sChild : smaller.children){
 				if(!usedChildren.contains(sChild)){
 					similarityScores.put(sChild, lChild.calculateSimilarityScore(sChild));
 				}
 			}
-			
+
 			if(similarityScores.size() > 0){
 				minNode = findMinScore(similarityScores);
 				score += similarityScores.get(minNode);
 				usedChildren.add(minNode);
 			}
 		}
-		
+
 		return score;
 	}
-	
+
 	public static Node findMinScore(HashMap<Node, Integer> similarityScores){
 		Node minNode = null;
 		int minScore = Integer.MAX_VALUE;
-		
+
 		for(Node key : similarityScores.keySet()){
 			if(similarityScores.get(key) < minScore){
 				minScore = similarityScores.get(key);
 				minNode = key;
 			}
 		}
-		
+
 		return minNode;
 	}
-	
+
 	public void calculateDistancesToRoot(){
 		if(root){
 			distanceToRoot = 0;
@@ -245,15 +248,15 @@ public class Node implements Comparable<Node>, Serializable{
 		else{
 			distanceToRoot = parent.distanceToRoot + 1;
 		}
-		
+
 		for(Node child : children){
 			child.calculateDistancesToRoot();
 		}
 	}
-	
+
 	public boolean containsSubclass(String subclass){
 		boolean ret = false;
-		
+
 		if(subclassOf.equals(subclass)){
 			ret = true;
 		}
@@ -263,15 +266,216 @@ public class Node implements Comparable<Node>, Serializable{
 				ret = child.containsSubclass(subclass);
 			}
 		}
-		
+
 		return ret;
 	}
 
 	//Levenshtein distance between strings
 	//From http://rosettacode.org/wiki/Levenshtein_distance#Java
-    private static int distance(String a, String b) {
-        a = a.toLowerCase();
-        b = b.toLowerCase();
+	private static int distance(String a, String b) {
+		a = a.toLowerCase();
+		b = b.toLowerCase();
+		// i == 0
+		int [] costs = new int [b.length() + 1];
+		for (int j = 0; j < costs.length; j++)
+			costs[j] = j;
+		for (int i = 1; i <= a.length(); i++) {
+			// j == 0; nw = lev(i - 1, j)
+			costs[0] = i;
+			int nw = i - 1;
+			for (int j = 1; j <= b.length(); j++) {
+				int cj = Math.min(1 + Math.min(costs[j], costs[j - 1]), a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1);
+				nw = costs[j];
+				costs[j] = cj;
+			}
+		}
+		return costs[b.length()];
+	}
+
+	/* THE WEIGHT NEEDS TO BE DIFFERENT!
+	* 
+	* As it is now, the similarity score is disproportiontely influenced by the levenshtein
+	* distance between the smallNames of the two nodes. Each difference is given the same
+	* weight as a difference in the number of relations or the relation to the parent
+	* for the two nodes.
+	* 
+	* Also, taking the minimum score for the comparison between all the nodes is probably not best
+	* as it does not necessarily lead to the minimum score overall.
+	*/
+	public double calculateSimilarityScore(Node o, HashMap<String, Double> parameters){
+		double score = 0;
+
+		int nodeDiff = numNodes() - o.numNodes(), distance = distance(o),
+				distToRootDiff = distanceToRoot - o.distanceToRoot;
+
+		score += distance * parameters.get("nodeDiffFactor");
+
+		if(nodeDiff < 0){
+			score += Math.abs(nodeDiff) * parameters.get("nodeLessNodes");
+		}
+		else if(nodeDiff > 0){
+			score += Math.abs(nodeDiff) * parameters.get("nodeMoreNodes");
+		}
+		else{
+			score -= parameters.get("nodeSameNumNodes");
+		}
+
+		if(distToRootDiff < 0){
+			score += Math.abs(distToRootDiff) * parameters.get("nodeLowerLevel");
+		}
+		else if(distToRootDiff > 0){
+			score += Math.abs(distToRootDiff) * parameters.get("nodeHigherLevel");
+		}
+		else{
+			score -= parameters.get("nodeSameLevel");
+		}
+
+		if(this.subclassOf.equals(o.subclassOf)){
+			score -= parameters.get("nodeSameSubclass");
+		}
+		else{
+			score += parameters.get("nodeDiffSubclass");
+		}
+
+		if(this.instanceOf.equals(o.instanceOf)){
+			score -= parameters.get("nodeSameInstance");
+		}
+		else{
+			score += parameters.get("nodeDiffInstance");
+		}
+
+		score -= commonRelations(o) * parameters.get("nodeCommonRelations");
+		score -= commonChildren(o) * parameters.get("nodeCommonChildren");
+
+		double tempNodeScore;
+		HashMap<Node, Double> tempSimilarityScores = new HashMap<Node, Double>();
+		ArrayList<Node> keySet = new ArrayList<Node>();
+		HashMap<Node, SimilarityScores> similarityScores = new HashMap<Node, SimilarityScores>();
+
+		for(Node cNode : children){
+			for(Node oCNode : o.children){
+				tempNodeScore = cNode.calculateSimilarityScore(oCNode, parameters);
+				tempSimilarityScores.put(oCNode, tempNodeScore);
+
+				if(!keySet.contains(oCNode)){
+					keySet.add(oCNode);
+				}
+			}
+
+			similarityScores.put(cNode, new SimilarityScores(tempSimilarityScores));
+		}			
+
+		return score + findMinSimilarityScore(similarityScores, keySet);
+	}
+
+	protected class SimilarityScores implements Comparable<SimilarityScores>{
+		public double totalScore;
+		public HashMap<Node, Double> scores;
+		public ArrayList<Node> keySet;
+
+		public SimilarityScores(HashMap<Node, Double> similarityScores){
+			totalScore = 0;
+			scores = similarityScores;
+			keySet = new ArrayList<Node>();
+
+			for(Node n : similarityScores.keySet()){
+				keySet.add(n);
+				totalScore += similarityScores.get(n);
+			}
+		}
+
+		@Override
+		public int compareTo(SimilarityScores o) {
+			return Double.compare(totalScore, o.totalScore);
+		}	
+	}
+	
+	private double findMinSimilarityScore(HashMap<Node, SimilarityScores> similarityScores, ArrayList<Node> keySet){
+		return findMinSimilarityScore(similarityScores, new ArrayList<Node>(), keySet);
+	}
+	
+	private double findMinSimilarityScore(HashMap<Node, SimilarityScores> similarityScores, ArrayList<Node> usedNodes, ArrayList<Node> keySet){
+		ArrayList<Double> totalScores = new ArrayList<Double>();
+		
+		for(int i = 0; i < keySet.size(); i++){
+			totalScores.add(0.0);
+		}
+		
+		SimilarityScores s, tempRemovedScores;
+		HashMap<Node, SimilarityScores> tempScores;
+		ArrayList<Node> tempKeySet;
+		Node tempRemovedNode;
+		
+		for(Node r : similarityScores.keySet()){
+			s = similarityScores.get(r);
+
+			tempScores = cloneScores(similarityScores);
+			tempRemovedNode = r;
+			tempRemovedScores = similarityScores.get(r);
+			tempScores.remove(r);
+		
+			for(int i = 0; i < totalScores.size(); i++){
+				Node n = keySet.get(i);
+
+                if(usedNodes.contains(n)){
+                        continue;
+                }
+
+				tempKeySet = cloneList(keySet);
+				tempKeySet.remove(n);
+                usedNodes.add(n);
+
+                double tempScore = findMinSimilarityScore(tempScores, usedNodes, tempKeySet);
+                usedNodes.remove(n);
+
+				totalScores.set(i, totalScores.get(i) + s.scores.get(n) + tempScore);
+			}
+			
+			tempScores.put(tempRemovedNode, tempRemovedScores);
+			
+			usedNodes.remove(r);
+		}
+		
+		return totalScores.size() == 0 ? 0 : Collections.min(totalScores);
+	}
+	
+	private HashMap<Node, SimilarityScores> cloneScores(HashMap<Node, SimilarityScores> scores){
+		HashMap<Node, SimilarityScores> newScores = new HashMap<Node, SimilarityScores>();
+		
+		for(Node k : scores.keySet()){
+			newScores.put(k, scores.get(k));
+		}
+		
+		return newScores;
+	}
+	
+	private ArrayList<Node> cloneList(ArrayList<Node> list){
+		ArrayList<Node> newList = new ArrayList<Node>();
+		
+		for(Node n : list){
+			newList.add(n);
+		}
+		
+		return newList;
+	}
+	
+	public int numNodes(){
+		return numNodes(0);
+	}
+
+	private int numNodes(int num){
+		num++;
+		
+		for(Node c : children){
+			num += c.numNodes(0);
+		}
+		
+		return num;
+	}
+	
+    public int distance(Node other) {
+        String a = smallName.toLowerCase();
+        String b = other.smallName.toLowerCase();
         // i == 0
         int [] costs = new int [b.length() + 1];
         for (int j = 0; j < costs.length; j++)
@@ -288,4 +492,19 @@ public class Node implements Comparable<Node>, Serializable{
         }
         return costs[b.length()];
     }
+    
+	public int commonRelations(Node otherNode){
+		int numCommon = 0;
+		
+		for(Node child : children){
+			for(Node oChild : otherNode.children){
+				if(oChild.relToParent.equals(child.relToParent)){
+					numCommon++;
+				}
+			}
+		}
+		
+		return numCommon;
+	}
+
 }

@@ -9,6 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import edu.smu.tspell.wordnet.Synset;
+import edu.smu.tspell.wordnet.SynsetType;
+import edu.smu.tspell.wordnet.WordNetDatabase;
 import graph.GlobalGraph;
 import graph.QuestionGraph;
 
@@ -18,9 +22,13 @@ public class QAPreProc {
 			IN_DIR = "all-remedia";
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException{
+		System.setProperty("wordnet.database.dir", "/Volumes/Files/gregorymoon/Google Drive/School/2015-2016/Fall 2015/CSE576 - Natural Language Processing/Non-Shared Project/workspace/Remedia-QA/resources/WordNet-3.0/dict");
+		WordNetDatabase db = WordNetDatabase.getFileInstance();
+		
 		String path;
 		File dir;
 		File[] dirListing;
+
 		for(int i = 2; i < MAX_LEVEL + 1; i++){
 			path = String.format("%s/level%d/org/", IN_DIR, i);
 
@@ -28,18 +36,18 @@ public class QAPreProc {
 			dirListing = dir.listFiles();
 			
 			for(int j = 0; j < dirListing.length; j++){
-				File file = dirListing[j],
-						outFile = new File(String.format("%s/level%d/%s", OUT_DIR, i, file.getName().replace(".txt", ".ser")));
-				if(getExtension(file.getName()).equals("txt") && !outFile.exists()){
+				File file = dirListing[j];//outFile = new File(String.format("%s/level%d/%s", OUT_DIR, i, file.getName().replace(".txt", ".ser")));
+				if(getExtension(file.getName()).equals("txt")){// && !outFile.exists()){
+					
 					System.out.println(String.format("\n\nCURRENT LEVEL: %d\nCURRENT FILE INDEX: %d\nCURRENT FILE: %s\n\n", i, (j-2), file.getAbsolutePath()));
 					
 					try{
 						process(file, i);
 					}
 					catch(StackOverflowError e){
-						System.out.println(String.format("\n\nERROR PROCESSING FILE %s\n\n", file.getAbsolutePath()));
-						Path p = FileSystems.getDefault().getPath(outFile.getAbsolutePath());
-						Files.delete(p);
+						//System.out.println(String.format("\n\nERROR PROCESSING FILE %s\n\n", file.getAbsolutePath()));
+						//Path p = FileSystems.getDefault().getPath(outFile.getAbsolutePath());
+						//Files.delete(p);
 					}
 				}
 
@@ -131,23 +139,25 @@ public class QAPreProc {
 	private static void parseAndWrite(String text, ArrayList<String> questionList, String filename, int level) throws IOException, ClassNotFoundException{
 		filename = filename.replace(".txt", ".ser");
 		String path = String.format("%s/level%d/%s", OUT_DIR, level, filename);
-		
+
+		/*
 		FileOutputStream fos = new FileOutputStream(path);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		*/
 		GlobalGraph gGraph = Parser.parseText(text);
 		QuestionGraph[] qGraphs = new QuestionGraph[questionList.size()];
 		
-		oos.writeObject(gGraph);
+		//oos.writeObject(gGraph);
 		
 		for(int i = 0; i < questionList.size(); i++){
 			qGraphs[i] = Parser.parseQuestion(questionList.get(i));
 		}
 		
-		oos.writeObject(qGraphs);
+		//oos.writeObject(qGraphs);
 			
-		oos.close();
+		//oos.close();
 		
-		test(new File(path), gGraph, qGraphs);
+		//test(new File(path), gGraph, qGraphs);
 	}
 	
 	private static String getExtension(String filename) {

@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import graph.GlobalGraph;
 import graph.Node;
@@ -11,11 +12,15 @@ public class QA {
 	public QuestionGraph qGraph;
 	public GlobalGraph gGraph;
 	public ArrayList<SentenceGraph> potentialAnswers;
+	public HashMap<String, Double> parameters;
+	public ArrayList<Double> sortedKeys;
 	
-	public QA(QuestionGraph qGraph, GlobalGraph gGraph){
+	public QA(QuestionGraph qGraph, GlobalGraph gGraph, HashMap<String, Double> parameters){
 		this.qGraph = qGraph;
 		this.gGraph = gGraph;
+		this.parameters = parameters;
 		potentialAnswers = new ArrayList<SentenceGraph>();
+		sortedKeys = new ArrayList<Double>();
 	}
 	
 	public void findAnswer(){
@@ -40,21 +45,34 @@ public class QA {
 	}
 	
 	public HashMap<Double, ArrayList<SentenceGraph>> rankSentences(){
-		HashMap<Double, ArrayList<SentenceGraph>> sentenceScores = new HashMap<Double, ArrayList<SentenceGraph>>();
+		HashMap<Double, ArrayList<SentenceGraph>> rankedGraphs = new HashMap<Double, ArrayList<SentenceGraph>>();
 		double score;
 		
 		for(SentenceGraph sGraph : gGraph.sentences){
-			score = qGraph.calculateSimilarityScore(sGraph);
-			score = sGraph.containsSubclass(qGraph.answerType) ? score - .1 : score;
+			score = 0;
 			
-			if(!sentenceScores.containsKey(score)){
-				sentenceScores.put(score, new ArrayList<SentenceGraph>());
+			if(sGraph.containsSubclass(qGraph.answerType)){
+				score -= parameters.get("qaAnswerTypeFound");
+			}
+			else{
+				score += parameters.get("qaAnswerTypeNotFound");
+			}
+
+			score += qGraph.calculateSimilarityScore(sGraph, parameters);
+			
+			if(!rankedGraphs.containsKey(score)){
+				rankedGraphs.put(score, new ArrayList<SentenceGraph>());
+				sortedKeys.add(score);
 			}
 			
-			sentenceScores.get(score).add(sGraph);
+			rankedGraphs.get(score).add(sGraph);
 		}
 		
-		return sentenceScores;
+		Collections.sort(sortedKeys);
+		
+
+		
+		return rankedGraphs;
 	}
 	
 	public void findPotentialAnswers(){
