@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import graph.GlobalGraph;
 import graph.QuestionGraph;
@@ -13,7 +15,9 @@ import graph.QuestionGraph;
 public class QAPreProc {
 	private static final int MAX_LEVEL = 5;
 	private static final String OUT_DIR = "all-remedia-processed",
-			IN_DIR = "all-remedia";
+			IN_DIR = "all-remedia-sanitized";
+	private static final Character[] SENTENCE_PUNCT = {'!', '.', '?'};
+	private static final List<Character> SENTENCE_PUNCT_LIST = new ArrayList<Character>(Arrays.asList(SENTENCE_PUNCT));
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException{
 		/*
@@ -35,7 +39,7 @@ public class QAPreProc {
 				File file = dirListing[j], outFile = new File(String.format("%s/level%d/%s", OUT_DIR, i, file.getName().replace(".txt", ".ser")));
 				if(getExtension(file.getName()).equals("txt") && !outFile.exists()){
 					
-					System.out.println(String.format("\n\nCURRENT LEVEL: %d\nCURRENT FILE INDEX: %d\nCURRENT FILE: %s\n\n", i, (j-2), file.getAbsolutePath()));
+					System.out.println(String.format("\n\nCURRENT LEVEL: %d\nCURRENT FILE INDEX: %d\nCURRENT FILE: %s\n\n", i, j, file.getAbsolutePath()));
 					
 					try{
 						process(file, i);
@@ -57,57 +61,28 @@ public class QAPreProc {
 		boolean questions = false;
 		ArrayList<String> questionList = new ArrayList<String>();
 		String line, text = "";
-		char currChar;
-		int lineIdx, lineNum = 0;
 
 		while(lines.hasNext()){
-			if(lineNum < 2){
-				lineNum++;
-				lines.next();
+			line = lines.next();
+			
+			if(line.equals("QUESTION_SECTION:")){
+				questions = true;
 				continue;
 			}
-
-			lineIdx = 0;
-			line = lines.next();
-			line = line.replace("\t", "");
 			
-			if(line.length() > 2 && line.charAt(0) == '1' && line.charAt(1) == '.'){
-				questions = true;
-			}
-			
-			if(questions && line.length() > 2){
-				currChar = line.charAt(0);
-				
-				while(currChar != '.'){
-					lineIdx++;
-					currChar = line.charAt(lineIdx);
-				}
-				
-				questionList.add(line.substring(lineIdx + 1).trim());
+			if(questions){
+				questionList.add(line);
 			}
 			else{
-				if(lineNum == 4){
-					String[] parts = line.split("\\)", 2);
-					String part2;
-					
-					text += " " + parts[0].trim() + "). ";
-					part2 = parts[1].trim();
-					
-					if(part2.substring(0, 2).equals("- ")){
-						part2 = part2.substring(2);
-					}
-					
-					text += part2;
+				if(!SENTENCE_PUNCT_LIST.contains(line.charAt(line.length() - 1))){
+					line += '.';
+				}
 
-				}
-				else{
-					text += line;
-				}
-				
-				lineNum++;
+				text += String.format("%s ", line);
 			}
 		}
 		
+		text = text.substring(0, text.length() - 1);
 		in.close();
 		
 		parseAndWrite(text, questionList, file.getName(), level);
