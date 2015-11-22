@@ -27,6 +27,11 @@ public class Parameters {
 		}
 	}
 	
+	@Override
+	public String toString(){
+		return parameters.toString();
+	}
+	
 	public Parameters(Map<String, Double> parameters){
 		setParameters(parameters);
 	}
