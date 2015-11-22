@@ -4,26 +4,22 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import edu.smu.tspell.wordnet.Synset;
-import edu.smu.tspell.wordnet.SynsetType;
-import edu.smu.tspell.wordnet.WordNetDatabase;
 import graph.GlobalGraph;
 import graph.QuestionGraph;
 
 public class QAPreProc {
 	private static final int MAX_LEVEL = 5;
-	private static final String OUT_DIR = "all-remedia-processed-pronoun-replace",
+	private static final String OUT_DIR = "all-remedia-processed",
 			IN_DIR = "all-remedia";
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException{
+		/*
 		System.setProperty("wordnet.database.dir", "/Volumes/Files/gregorymoon/Google Drive/School/2015-2016/Fall 2015/CSE576 - Natural Language Processing/Non-Shared Project/workspace/Remedia-QA/resources/WordNet-3.0/dict");
 		WordNetDatabase db = WordNetDatabase.getFileInstance();
+		*/
 		
 		String path;
 		File dir;
@@ -36,8 +32,8 @@ public class QAPreProc {
 			dirListing = dir.listFiles();
 			
 			for(int j = 0; j < dirListing.length; j++){
-				File file = dirListing[j];//outFile = new File(String.format("%s/level%d/%s", OUT_DIR, i, file.getName().replace(".txt", ".ser")));
-				if(getExtension(file.getName()).equals("txt")){// && !outFile.exists()){
+				File file = dirListing[j], outFile = new File(String.format("%s/level%d/%s", OUT_DIR, i, file.getName().replace(".txt", ".ser")));
+				if(getExtension(file.getName()).equals("txt") && !outFile.exists()){
 					
 					System.out.println(String.format("\n\nCURRENT LEVEL: %d\nCURRENT FILE INDEX: %d\nCURRENT FILE: %s\n\n", i, (j-2), file.getAbsolutePath()));
 					
@@ -140,24 +136,24 @@ public class QAPreProc {
 		filename = filename.replace(".txt", ".ser");
 		String path = String.format("%s/level%d/%s", OUT_DIR, level, filename);
 
-		/*
+		
 		FileOutputStream fos = new FileOutputStream(path);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		*/
+		
 		GlobalGraph gGraph = Parser.parseText(text);
 		QuestionGraph[] qGraphs = new QuestionGraph[questionList.size()];
 		
-		//oos.writeObject(gGraph);
+		oos.writeObject(gGraph);
 		
 		for(int i = 0; i < questionList.size(); i++){
 			qGraphs[i] = Parser.parseQuestion(questionList.get(i));
 		}
 		
-		//oos.writeObject(qGraphs);
+		oos.writeObject(qGraphs);
 			
-		//oos.close();
+		oos.close();
 		
-		//test(new File(path), gGraph, qGraphs);
+		test(new File(path), gGraph, qGraphs);
 	}
 	
 	private static String getExtension(String filename) {

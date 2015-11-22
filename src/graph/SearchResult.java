@@ -2,12 +2,7 @@ package graph;
 
 
 public class SearchResult{
-	public Node parent, child;
-	
-	public SearchResult(){
-		parent = null;
-		child = null;
-	}
+	private Node parent, child;
 	
 	public boolean bothFound(){
 		return parentFound() && childFound();
@@ -27,9 +22,33 @@ public class SearchResult{
 	
 	@Override
 	public String toString(){
-		String parentString = parentFound() ? parent.name : "null",
-				childString = childFound() ? child.name : "null";
+		String parentString = parentFound() ? parent.getName() : "null",
+				childString = childFound() ? child.getName() : "null";
 		
 		return String.format("Parent: %s\nChild: %s\n", parentString, childString);
+	}
+	
+	public Node getParent(){
+		return parent;
+	}
+	
+	public void setParent(Node parent){
+		this.parent = parent;
+	}
+
+	public Node getChild(){
+		return child;
+	}
+	
+	public void setChild(Node child){
+		this.child = child;
+	}
+	
+	public void setParentName(String name){
+		this.parent.setName(name);
+	}
+
+	public void setParentSemanticRole(String semanticRole){
+		this.parent.setSemanticRole(semanticRole);
 	}
 }

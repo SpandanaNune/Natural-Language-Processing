@@ -1,37 +1,35 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import graph.GlobalGraph;
 import graph.QuestionGraph;
 import graph.SentenceGraph;
+import ranker.RankResult;
+import ranker.Ranker;
 
 public class RemediaQA {
 	private static String basePath = "all-remedia-processed/";
 
 	public static void main(String[] args) throws FileNotFoundException{
 		HashMap<String, Double> parameters = getParameters();
-		Parser.readSetFromFile(new File(basePath + "level2/rm2-18.ser"));
+		Ranker ranker = new Ranker(parameters);
+		Parser.readSetFromFile(new File(basePath + "level2/rm2-1.ser"));
 		QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
 		GlobalGraph gGraph = Parser.getGlobalGraph();
 		
 		System.out.println("Text:");
 		
-		for(int i = 0; i < gGraph.sentences.size(); i++){
-			SentenceGraph sGraph = gGraph.sentences.get(i);
-			System.out.println(String.format("%d: %s", (i+1), sGraph.sentence));
+		for(SentenceGraph s : gGraph.getSentences()){
+			System.out.println(s.getSentence());
 		}
 		
-		System.out.println();
-		
 		for(QuestionGraph qGraph : qGraphs){
-			System.out.println("\nQuestion: " + qGraph.sentence + "\n");
-			QA qa = new QA(qGraph, gGraph, parameters);
-			System.out.println("RANKED SENTENCES: \n");
-			qa.findAnswer();
+			RankResult ranks = ranker.rankSentences(qGraph, gGraph);
+			
+			for(Double key : ranks.getSortedKeys()){
+				System.out.println(ranks.getRankedGraphs().get(key));
+			}
 		}
 	}
 

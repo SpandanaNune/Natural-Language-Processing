@@ -1,6 +1,7 @@
 package ranker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +17,30 @@ public class Ranker {
 		setParameters(parameters);
 	}
 
-	public Map<Double, List<SentenceGraph>> rankSentences(QuestionGraph qGraph, GlobalGraph gGraph){
+	public RankResult rankSentences(QuestionGraph qGraph, GlobalGraph gGraph){
 		Map<Double, List<SentenceGraph>> rankedGraphs = new HashMap<Double, List<SentenceGraph>>();
-		double score;
+		List<Double> sortedKeys = new ArrayList<Double>();
 		
-		for(SentenceGraph sGraph : gGraph.sentences){
-			score = 0;
+		for(SentenceGraph sGraph : gGraph.getSentences()){
+			double score = calculateSimilarityScore(qGraph, sGraph); 
 			
-			if(sGraph.containsSubclass(qGraph.answerType)){
+			if(!rankedGraphs.containsKey(score)){
+				rankedGraphs.put(score, new ArrayList<SentenceGraph>());
+			}
+			
+			rankedGraphs.get(score).add(sGraph);
+		}
+		
+		sortedKeys.addAll(rankedGraphs.keySet());
+		Collections.sort(sortedKeys);
+		
+		return new RankResult(sortedKeys, rankedGraphs);
+	}
+	
+	public double calculateSimilarityScore(QuestionGraph qGraph, SentenceGraph sGraph){
+			double score = 0;
+			
+			if(sGraph.containsSubclass(qGraph.getAnswerType())){
 				score -= parameters.get("qaAnswerTypeFound");
 			}
 			else{
@@ -32,19 +49,7 @@ public class Ranker {
 
 			score += qGraph.calculateSimilarityScore(sGraph, parameters);
 			
-			if(!rankedGraphs.containsKey(score)){
-				rankedGraphs.put(score, new ArrayList<SentenceGraph>());
-				sortedKeys.add(score);
-			}
-			
-			rankedGraphs.get(score).add(sGraph);
-		}
-		
-		Collections.sort(sortedKeys);
-		
-
-		
-		return rankedGraphs;
+			return score;
 	}
 
 	//Getters & Setters

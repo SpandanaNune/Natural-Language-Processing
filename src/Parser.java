@@ -23,8 +23,8 @@ import module.graph.helper.GraphPassingNode;
 public abstract class Parser {
 	private static Reader reader;
 	private static DocumentPreprocessor dp;
-	private static SentenceToGraph stg; //= new SentenceToGraph();
-	private static GraphPassingNode gpn2; //= stg.extractGraph("Initializing Parser", false, true, true);
+	private static SentenceToGraph stg;
+	private static GraphPassingNode gpn2;
 	private static GlobalGraph gGraph;
 	private static QuestionGraph[] qGraphs;
 	private static PrintStream stdout;
@@ -123,19 +123,19 @@ public abstract class Parser {
 			relationList = gpn2.getAspGraph();
 			
 			modifiedSentence = baos.toString().split("\n")[0].replace("Modified:", "").trim();
-			/*
+			
 			sGraph = new SentenceGraph(gpn2.getposMap(), currSentence, sentenceNum);
 			relationList = sortRelations(gpn2.getAspGraph());
-			*/
+			
 
 			stdout.println("Sentence from kparser: " + modifiedSentence);
 			modifiedSentence = processSentence(modifiedSentence, gpn2.getposMap(), gpn2.getWordSenseMap(), relationList);
 			stdout.println("Modified Sentence: " + modifiedSentence + "\n");
 
-			//parse(sGraph, relationList);
+			parse(sGraph, relationList);
 			
 			sentenceNum++;
-			//gGraph.add(sGraph);
+			gGraph.add(sGraph);
 			baos.reset();
 		}
 		
@@ -399,6 +399,10 @@ public abstract class Parser {
 	}
 	
 	private static void init(String input){
+		if(stg == null){
+			stg = new SentenceToGraph();
+			gpn2 = stg.extractGraph("Initializing Parser", false, true, true);
+		}
 		reader = new StringReader(input);
 		dp = new DocumentPreprocessor(reader);
 	}
