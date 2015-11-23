@@ -7,8 +7,8 @@ The captain's name is Thor. Since he landed, he has told many tales. Often, he a
 For months they did not see land. At last, they spotted some birds. But more weeks went by without land. On day 101 of the trip, they reached the shores of the South Sea Islands.
 The name of their boat is the Kon Tiki. It traveled 4,950 miles. But the men don't plan to sail it back to Peru. They will take a ship home. They are going to let someone else do all that hard work.
 QUESTION_SECTION:
-1. Who is the captain of the sailboat?
-2. What is the name of the boat?
-3. When did they reach the shore?
-4. Where did the trip start?
-5. Why did they make the trip?
+Who is the captain of the sailboat?
+What is the name of the boat?
+When did they reach the shore?
+Where did the trip start?
+Why did they make the trip?

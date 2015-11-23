@@ -57,56 +57,6 @@ public class Ranker {
 			return score;
 	}
 
-	public static int getRank(String sentence, RankResult result){
-		int rank = 0;
-		
-		for(Double key : result.getSortedKeys()){
-			List<SentenceGraph> sGraphList = result.getRankedGraphs().get(key);
-			
-			for(SentenceGraph oGraph : sGraphList){
-				if(oGraph.getSentence().equals(sentence)){
-					rank += sGraphList.size() - 1;
-					return rank;
-				}
-			}
-			
-			rank += sGraphList.size();
-		}
-
-		return -1;	
-	}
-	
-	public static int getRank(SentenceGraph sGraph, RankResult result){
-		int rank = 0;
-		
-		for(Double key : result.getSortedKeys()){
-			List<SentenceGraph> sGraphList = result.getRankedGraphs().get(key);
-			
-			for(SentenceGraph oGraph : sGraphList){
-				if(sGraph.equals(oGraph)){
-					rank += sGraphList.size() - 1;
-					return rank;
-				}
-			}
-			
-			rank += sGraphList.size();
-		}
-
-		return -1;	
-	}
-	
-	public static double getScore(String sentence, RankResult result){
-		for(Double key : result.getSortedKeys()){
-			for(SentenceGraph sGraph : result.getRankedGraphs().get(key)){
-				if(sGraph.getSentence().equals(sentence)){
-					return key;
-				}
-			}
-		}
-
-		return -1;
-	}
-
 	//Getters & Setters
 	
 	public Parameters getParameters() {

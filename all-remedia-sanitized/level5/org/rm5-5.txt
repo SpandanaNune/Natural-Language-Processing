@@ -6,8 +6,8 @@ A pilot named Chuck Yeager was the first person to fly faster than the speed of 
 But Jackie knew just what to do. She held onto the controls and watched the needle on her instrument panel. When it edged past the words, "Mach One," she had broken the sound barrier.
 Then Jackie eased her plane out of its steep dive. She returned safely to a warm welcome from the crowd on the ground.
 QUESTION_SECTION:
-1. Who is Chuck Yeager?
-2. What did Jackie Cochran do?
-3. When did Jackie pull her plane out of its steep dive?
-4. Where did Yeager fly to coach Jackie?
-5. How high did she take her plane?
+Who is Chuck Yeager?
+What did Jackie Cochran do?
+When did Jackie pull her plane out of its steep dive?
+Where did Yeager fly to coach Jackie?
+How high did she take her plane?

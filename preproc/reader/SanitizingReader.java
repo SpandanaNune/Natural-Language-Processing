@@ -1,10 +1,9 @@
+package reader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
-
-import reader.RemediaReader;
 
 public abstract class SanitizingReader extends RemediaReader{
 	public static void readFile(String path, String inDir, String outDir) throws IOException{
@@ -57,6 +56,10 @@ public abstract class SanitizingReader extends RemediaReader{
 					questionsFound = true;
 					writer.println("QUESTION_SECTION:");
 				}
+			}
+
+			if(questionsFound){
+				line = line.replaceFirst("[0-9]+\\.", "").trim();
 			}
 
 			writer.println(line);

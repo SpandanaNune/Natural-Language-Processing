@@ -27,13 +27,26 @@ public class Parameters {
 		}
 	}
 	
+	public Parameters(Map<String, Double> parameters){
+		setParameters(parameters);
+	}
+
+	@Override
+	public boolean equals(Object o){
+		Parameters oParams = (Parameters) o;
+
+		for(String key : Parameters.getKeys()){
+			if(parameters.get(key).doubleValue() != oParams.get(key).doubleValue()){
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
 	@Override
 	public String toString(){
 		return parameters.toString();
-	}
-	
-	public Parameters(Map<String, Double> parameters){
-		setParameters(parameters);
 	}
 	
 	@Override

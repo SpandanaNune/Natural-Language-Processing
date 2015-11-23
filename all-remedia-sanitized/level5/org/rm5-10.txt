@@ -8,8 +8,8 @@ Why did the stock market crash? Lately, more and more people have been buying st
 But, the people finally ran out of money to spend. Instead of buying, everyone wanted to sell their stocks at once. This made the prices drop.
 In time, the prices of stocks may climb again. For many, however, today is the day they lost their life savings.
 QUESTION_SECTION:
-1. Who are stockholders?
-2. What is the stock market?
-3. When did the stock market crash?
-4. Where is the stock market?
-5. Why did the stock market crash?
+Who are stockholders?
+What is the stock market?
+When did the stock market crash?
+Where is the stock market?
+Why did the stock market crash?

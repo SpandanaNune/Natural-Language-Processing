@@ -6,8 +6,8 @@ This report will be carefully checked. Just a few months ago, Mr. Simon Newcomb 
 Not much is known about the Wright brothers, except that they own a bicycle repair shop in Dayton, Ohio.
 The two were asked how their machine stayed in the air. The brothers said that they used movable parts on the wings to control it. They claim that they built their machine after making smaller scale models that worked. The Wrights say they have worked on this machine for seven years, at a cost of $1,000.
 QUESTION_SECTION:
-1. Who says they flew in a heavier-than-air machine?
-2. What did they use to control the machine?
-3. When did they say they first flew this machine?
-4. Where do they live?
-5. Why is this claim hard to believe?
+Who says they flew in a heavier-than-air machine?
+What did they use to control the machine?
+When did they say they first flew this machine?
+Where do they live?
+Why is this claim hard to believe?

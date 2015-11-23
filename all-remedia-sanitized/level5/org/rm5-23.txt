@@ -6,8 +6,8 @@ It comes as a surprise that Boston beat Pittsburgh. Perhaps the Boston team had 
 The World Series winner is the team that wins the best of eight games. This year, Boston won five games to Pittsburgh's three. Many fans say that the turning point was the second game which Boston won by a score of 3-0. From that point on, they played like true champions.
 The hero of the Boston team is Cy Young. He won two of the games for his team with his great pitching.
 QUESTION_SECTION:
-1. Who played in the first World Series?
-2. What are the names of the two baseball leagues?
-3. When was the turning point for Boston?
-4. Where was the final World Series game played?
-5. Why is Cy Young the hero of the Boston team?
+Who played in the first World Series?
+What are the names of the two baseball leagues?
+When was the turning point for Boston?
+Where was the final World Series game played?
+Why is Cy Young the hero of the Boston team?

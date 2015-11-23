@@ -7,8 +7,8 @@ One of the first signs of solar flares are dark spots on the sun. These sunspots
 be huge. The ones that scientists can see are big enough to contain 70 planets the size of Earth.
 The solar flares are not all bad. They cause the night sky to light up with beautiful colors. These are called the northern lights.
 QUESTION_SECTION:
-1. What is causing automatic garage doors to open and close on their own?
-2. What are these storms called?
-3. When was the last time these storms happened?
-4. Where is the sun (how far from Earth)?
-5. Why are these storms not all bad?
+What is causing automatic garage doors to open and close on their own?
+What are these storms called?
+When was the last time these storms happened?
+Where is the sun (how far from Earth)?
+Why are these storms not all bad?

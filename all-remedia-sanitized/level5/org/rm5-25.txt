@@ -7,8 +7,8 @@ Now people will be able to get to work faster. As more stations are added, they 
 It took four years to build this subway. There is another one in the city of Boston that has been in use for a few years.
 The world's oldest subway is in London. It was built in 1863.
 QUESTION_SECTION:
-1. Who drove the first New York subway?
-2. What is a subway?
-3. When was the world's first subway built?
-4. Where is another city in the United States with a subway?
-5. Why is the subway useful?
+Who drove the first New York subway?
+What is a subway?
+When was the world's first subway built?
+Where is another city in the United States with a subway?
+Why is the subway useful?

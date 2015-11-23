@@ -129,7 +129,7 @@ public class SentenceGraph extends Graph{
 			}
 		}
 
-		//calculateDistancesToRoot();
+		calculateDistancesToRoot();
 	}
 
 	private SearchResult search(String parentName, String childName){
@@ -296,11 +296,20 @@ public class SentenceGraph extends Graph{
 		return totalScores.size() == 0 ? 0 : Collections.min(totalScores);
 	}
 	
+	public String printNodes(){
+		return super.toString();
+	}
+
 	@Override
 	public boolean equals(Object o){
 		SentenceGraph oGraph = (SentenceGraph) o;
 		
 		return sentence.equals(oGraph.sentence);
+	}
+	
+	@Override
+	public String toString(){
+		return sentence;
 	}
 
 

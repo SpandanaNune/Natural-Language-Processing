@@ -6,8 +6,8 @@ As you press each key, it touches apiece of paper. Each letter appears in the or
 A man named Mr. Sholes made his first typewriter 16 years ago. Since then, he has been trying to make it better. At first, he put all the keys with letters in the order of the alphabet. This didn't work. The keys kept hitting each other.
 So, Mr. Sholes mixed up the letters. He did this until he found a way to make the keys stop hitting each other. Now the letters are jumbled and out of order. But the machine works just fine!
 QUESTION_SECTION:
-1. Who thought of a new machine for writing?
-2. What is the new machine called?
-3. When did Mr. Sholes make the first one?
-4. Where did this happen?
-5. Why are the letters jumbled?
+Who thought of a new machine for writing?
+What is the new machine called?
+When did Mr. Sholes make the first one?
+Where did this happen?
+Why are the letters jumbled?

@@ -16,174 +16,99 @@ public class EM{
 	private static int numCorrectAnswers, numQuestions;
 
 	public static void main(String[] args) throws FileNotFoundException{
-		Parameters params = new Parameters();
+		List<String> paths = initPaths();
 		List<List<String>> answerLists = initAnswerLists();
-		List<String> paths = initPaths(),
-				foundQuestions = new ArrayList<String>();
-
-		numQuestions = 0;
-
-		for(int j = 0; j < paths.size(); j++){
-			if(j == 0){
-				numCorrectAnswers = 0;
-			}
-
-			String path = paths.get(j);
-			List<String> answers = answerLists.get(j);
-
-			Parser.readSetFromFile(new File(path));
+		Parameters params = new Parameters();
+		int correct = 0, asked = 0;
+		
+		for(int i = 0; i < paths.size(); i++){
+			String path = paths.get(i);
+			Parser.readSetFromFile(path);
 			QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
 			GlobalGraph gGraph = Parser.getGlobalGraph();
-
-
-			/*
-			System.out.println("Text: ");
-
-			for(SentenceGraph sGraph : gGraph.sentences){
-				System.out.println("\t" + sGraph.sentence);
-			}
-			 */
-
-			int prevNumCorrect = numCorrectAnswers;
-
-			for(int i = 0; i < qGraphs.length; i++){
-				if(i == 0){
-					numCorrectAnswers = prevNumCorrect;
-				}
-
-				String answer = answers.get(i);
-				QuestionGraph qGraph = qGraphs[i];
-
-				if(qGraph.getSentence().contains("Who")){
-					qGraph.setAnswerType("person");
-				}
-				else if(qGraph.getSentence().contains("How") || qGraph.getSentence().contains("Why")){
+			List<String> answers = answerLists.get(i);
+			
+			for(int j = 0; j < answers.size(); j++){
+				String answer = answers.get(j);
+				QuestionGraph qGraph = qGraphs[j];
+				
+				if(qGraph.getSentence().contains("Why") || qGraph.getSentence().contains("How")){
 					continue;
 				}
+				
+				Parameters tempParams = calculateParameters(answer, qGraph, gGraph, params);
 
-				if(!foundQuestions.contains(qGraph.getSentence())){
-					numQuestions++;
-					foundQuestions.add(qGraph.getSentence());
-				}
-
-				System.out.println("\n\nQuestion: " + qGraph.getSentence());
-				System.out.println("Answer: " + answer);
-
-				if(calculateParameters(answer, qGraph, gGraph, params)){
-					i = -1;
-					j = -1;
-				}
-			}
-		}
-
-		System.out.println("\nWith max allowed rank = " + MAX_ALLOWED_RANK);
-		System.out.println("Num Questions: " + numQuestions);
-		System.out.println("Num correct answers: " + numCorrectAnswers);
-	}
-
-	public static boolean improveRank(int currRank, int lastRank){
-		return lastRank > currRank;
-	}
-
-	public static boolean compareMaps(HashMap<String, Double> m1, HashMap<String, Double> m2){
-		if(m1.keySet().size() != m2.keySet().size()){
-			return false;
-		}
-
-		Double m1Val, m2Val;
-
-		for(String key : m1.keySet()){
-			if(!m2.containsKey(key)){
-				return false;
-			}
-
-			m1Val = m1.get(key);
-			m2Val = m2.get(key);
-
-			if(m1Val.doubleValue() != m2Val.doubleValue()){
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	public static boolean calculateParameters(String answer, QuestionGraph qGraph, GlobalGraph gGraph, Parameters params){
-		double currParamValue, originalParamValue;
-		int currRank = MAX_ALLOWED_RANK + 1, lastRank, originalRank = 0;
-		Ranker ranker = new Ranker(params);
-
-		for(int i = 0; i < Parameters.getKeys().size(); i++){
-			String currParamName = Parameters.getKeys().get(i);
-			currParamValue = params.get(currParamName);
-			originalParamValue = currParamValue;
-
-			RankResult rankedSentences = ranker.rankSentences(qGraph, gGraph);
-
-			currRank = Ranker.getRank(answer, rankedSentences);
-			lastRank = currRank;
-			originalRank = lastRank;
-
-			if(currRank > MAX_ALLOWED_RANK){
-				do{
-					currParamValue += .1;
-					params.replace(currParamName, currParamValue);
-
-					rankedSentences = ranker.rankSentences(qGraph, gGraph);
-
-					lastRank = currRank;
-					currRank = Ranker.getRank(answer, rankedSentences);
-				}
-				while(currRank < lastRank || (currRank < lastRank && currRank > MAX_ALLOWED_RANK));
-
-				if(currRank < originalRank){
-					params.replace(currParamName, currParamValue - .1);
-
-					if(currRank <= MAX_ALLOWED_RANK){
-						break;
-					}
-					else{
-						i = - 1;
-					}
+				System.out.println(String.format("Question: %s", qGraph.getSentence()));
+				System.out.println(String.format("Answer: %s", answer));
+				
+				if(tempParams == null){
+					System.out.println("FAILED\n");
 				}
 				else{
-					params.replace(currParamName, originalParamValue);
+					System.out.println(String.format("Success Params: %s\n", tempParams.toString()));
+
+					if(!params.equals(tempParams) && j != 0){
+						System.out.println("Changing Parameter Values & Restarting\n");
+						params = tempParams;
+						j = -1;
+						i = -1;
+						correct = 0;
+						asked = 0;
+					}
+					
+					correct++;
 				}
+				
+				asked++;
 			}
-		}
-
-		ranker.rankSentences(qGraph, gGraph);
-
-		if(currRank < MAX_ALLOWED_RANK){
-			Parameters parameters = params.clone();
-			System.out.println("Achieved Rank: " + currRank + " with parameters:");
-			System.out.println(parameters);
-
-
-			if(currRank < originalRank){
-				return true;
-			}
-			else{
-				numCorrectAnswers++;
-				return false;
-			}
-		}
-		else{
-			System.out.println("FAILED");
-
-			return false;
 		}
 	}
+	
+	private static Parameters calculateParameters(String answer, QuestionGraph qGraph, GlobalGraph gGraph, Parameters params){
+		if(params == null){
+			params = new Parameters();
+		}
 
-	//Initialization
+		Ranker ranker = new Ranker(params);
+
+		RankResult initResult = ranker.rankSentences(qGraph, gGraph);
+		int originalRank = initResult.getRank(answer);
+		
+		if(originalRank > MAX_ALLOWED_RANK){
+			int lastRank = originalRank,
+					currRank = originalRank;
+			Parameters tempParams = params.clone();
+
+			for(String paramKey : Parameters.getKeys()){
+				do{
+					tempParams.setParameter(paramKey, tempParams.get(paramKey) + .1);
+					ranker.setParameters(tempParams);
+					RankResult result = ranker.rankSentences(qGraph, gGraph);
+					lastRank = currRank;
+					currRank = result.getRank(answer); 
+				}while(currRank < lastRank);
+				
+				tempParams.setParameter(paramKey, tempParams.get(paramKey) - .1);
+			}
+			
+			if(lastRank <= MAX_ALLOWED_RANK){
+				params = tempParams;
+			}
+			else{
+				return null;
+			}
+		}
+		
+		return params;
+	}
 
 	private static List<String> initPaths(){
 		List<String> paths  = new ArrayList<String>();
 
 		paths.add(basePath + "level2/rm2-1.ser");
-		paths.add(basePath + "level2/rm2-15.ser");
-		paths.add(basePath + "level2/rm2-3.ser");
-		paths.add(basePath + "level2/rm2-13.ser");
+		//paths.add(basePath + "level2/rm2-15.ser");
+		//paths.add(basePath + "level2/rm2-3.ser");
+		//paths.add(basePath + "level2/rm2-13.ser");
 
 		return paths;
 	}

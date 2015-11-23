@@ -30,6 +30,22 @@ public class GlobalGraph extends Graph {
 		}
 	}
 	
+	@Override
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		
+		for(int i = 0; i < sentences.size(); i++){
+			SentenceGraph sGraph = sentences.get(i);
+			sb.append(sGraph.toString());
+			
+			if(i < sentences.size() - 1){
+				sb.append("\n");
+			}
+		}
+		
+		return sb.toString();
+	}
+
 	private void add(Node nodeToAdd){
 		rootNodes.add(nodeToAdd);
 	}

@@ -6,8 +6,8 @@ These two monkeys are space pioneers who took the place of people. In this way, 
 Able weighs seven pounds, and tiny Baker weighs just one pound. Both of them have small, metal pieces placed near their brains. In theirs spacecraft, they were wired to boxes so scientists could tell how they act in space. They measured their heartbeat, breathing, and other signs of life.
 Recently, Russia sent a dog named Laika into space. When her spacecraft returned to Earth, Laika was dead. Many more space tests will have to be made before the first person can be safely sent.
 QUESTION_SECTION:
-1. Who went into space and came back safely?
-2. What kind of animals are they?
-3. When did they safely land back on Earth?
-4. Where did scientists place small metal parts?
-5. Why are animals sent into space?
+Who went into space and came back safely?
+What kind of animals are they?
+When did they safely land back on Earth?
+Where did scientists place small metal parts?
+Why are animals sent into space?

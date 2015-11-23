@@ -66,6 +66,10 @@ public abstract class Parser {
 
 		return retVal;
 	}
+
+	public static void readSetFromFile(String path) {
+		readSetFromFile(new File(path));
+	}
 	
 	public static void readSetFromFile(File file){
 		if(!file.exists()){
@@ -459,4 +463,5 @@ public abstract class Parser {
             return filename.substring(index + 1);
         }
     }
+
 }

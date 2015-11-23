@@ -7,8 +7,8 @@ It is said that most people did not even feel a bump as the ship hit the iceberg
 As it sank, the ship's crew sent a cry for help across their radio. It was heard in New York by a young radio operator. He sent messages to other nearby ships, asking them to help rescue the people.
 Some of the passengers are well-known. They are leaders in business. Their names will be announced when it is learned whether they lived or not.
 QUESTION_SECTION:
-1. Who heard the crew's cry for help?
-2. What is the name of the ship?
-3. When did the ship sink?
-4. Where did the ship sink?
-5. Why did the ship sink?
+Who heard the crew's cry for help?
+What is the name of the ship?
+When did the ship sink?
+Where did the ship sink?
+Why did the ship sink?

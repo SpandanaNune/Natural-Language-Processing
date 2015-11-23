@@ -7,8 +7,8 @@ There will now be only four different times in the country. Each time zone will 
 Some people are upset about this time change. "The sun is no longer boss of the job," wrote one person. "People will have to marry by railroad time and die by railroad time," wrote another.
 Railroad time is the idea of William Allen. He thinks it's important to have all the trains leave and arrive on time.
 QUESTION_SECTION:
-1. Who had the idea for "railroad time"?
-2. What will the railroads do to their clocks?
-3. When will they do this?
-4. Where is the time four minutes earlier than in Chicago?
-5. Why does Allen want to have fixed times?
+Who had the idea for "railroad time"?
+What will the railroads do to their clocks?
+When will they do this?
+Where is the time four minutes earlier than in Chicago?
+Why does Allen want to have fixed times?

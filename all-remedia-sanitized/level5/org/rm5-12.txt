@@ -7,8 +7,8 @@ Last spring, the space shuttle launched a new spacecraft. Now that craft is circ
 This spacecraft is named for an explorer from the past. It is called Magellan.
 Sometime in 1990, a huge telescope will be sent into outer space. It may see all the way to the edge of the universe.
 QUESTION_SECTION:
-1. Who has a spacecraft named for him?
-2. What planet will Voyager 2 pass this year?
-3. When will a huge telescope be sent into outer space?
-4. Where will Voyager 2 go after Neptune?
-5. Why will the huge telescope take great photos?
+Who has a spacecraft named for him?
+What planet will Voyager 2 pass this year?
+When will a huge telescope be sent into outer space?
+Where will Voyager 2 go after Neptune?
+Why will the huge telescope take great photos?
