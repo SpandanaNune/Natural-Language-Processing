@@ -1,7 +1,5 @@
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import graph.GlobalGraph;
@@ -13,57 +11,110 @@ import ranker.Ranker;
 public class EM{
 	private static String basePath = "all-remedia-processed/";
 	private static final int MAX_ALLOWED_RANK = 5;
-	private static int numCorrectAnswers, numQuestions;
 
 	public static void main(String[] args) throws FileNotFoundException{
 		List<String> paths = initPaths();
 		List<List<String>> answerLists = initAnswerLists();
-		Parameters params = new Parameters();
-		int correct = 0, asked = 0;
-		
-		for(int i = 0; i < paths.size(); i++){
-			String path = paths.get(i);
+
+		for(int k = 0; k < paths.size(); k++){
+			int exclude = k;
+			boolean reset = true;
+			Parameters params = new Parameters();
+			int correct = 0, asked = 0;
+
+			//TRAINING LOOP
+
+			for(int i = 0; i < paths.size(); i++){
+				if(i == exclude){
+					continue;
+				}
+
+				if(reset){
+					reset = false;
+					asked = 0;
+					correct = 0;
+				}
+
+				String path = paths.get(i);
+				List<String> answers = answerLists.get(i);
+				Parser.readSetFromFile(path);
+				QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
+				GlobalGraph gGraph = Parser.getGlobalGraph();
+
+				for(int j = 0; j < answers.size(); j++){
+					String answer = answers.get(j);
+					QuestionGraph qGraph = qGraphs[j];
+
+					if(qGraph.getSentence().contains("Why") || qGraph.getSentence().contains("How")){
+						continue;
+					}
+
+					Parameters tempParams = calculateParameters(answer, qGraph, gGraph, params);
+
+					/*
+					System.out.println(String.format("Question: %s", qGraph.getSentence()));
+					System.out.println(String.format("Answer: %s", answer));
+					*/
+
+					if(tempParams == null){
+					//	System.out.println("FAILED\n");
+					}
+					else{
+					//	System.out.println(String.format("Success Params: %s\n", tempParams.toString()));
+
+						if(!params.equals(tempParams)){
+					//		System.out.println("Changing Parameter Values & Restarting\n");
+							params = tempParams;
+							j = -1;
+							i = -1;
+							reset = true;
+							continue;
+						}
+
+						correct++;
+					}
+
+					asked++;
+				}
+			}
+
+			//VALIDATION LOOP
+			Ranker ranker = new Ranker(params);
+			String path = paths.get(exclude);
+			List<String> answers = answerLists.get(exclude);
 			Parser.readSetFromFile(path);
 			QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
 			GlobalGraph gGraph = Parser.getGlobalGraph();
-			List<String> answers = answerLists.get(i);
+			int finalCorrect = 0, finalAsked = 0;
 			
-			for(int j = 0; j < answers.size(); j++){
-				String answer = answers.get(j);
-				QuestionGraph qGraph = qGraphs[j];
+			for(int i = 0; i < answers.size(); i++){
+				QuestionGraph qGraph = qGraphs[i];
+				String answer = answers.get(i);
+				RankResult result = ranker.rankSentences(qGraph, gGraph);
 				
 				if(qGraph.getSentence().contains("Why") || qGraph.getSentence().contains("How")){
-					continue;
+				//	continue;
 				}
 				
-				Parameters tempParams = calculateParameters(answer, qGraph, gGraph, params);
-
-				System.out.println(String.format("Question: %s", qGraph.getSentence()));
-				System.out.println(String.format("Answer: %s", answer));
+				int rank = result.getRank(answer);
 				
-				if(tempParams == null){
-					System.out.println("FAILED\n");
-				}
-				else{
-					System.out.println(String.format("Success Params: %s\n", tempParams.toString()));
-
-					if(!params.equals(tempParams) && j != 0){
-						System.out.println("Changing Parameter Values & Restarting\n");
-						params = tempParams;
-						j = -1;
-						i = -1;
-						correct = 0;
-						asked = 0;
-					}
-					
-					correct++;
+				if(rank <= MAX_ALLOWED_RANK){
+					finalCorrect++;
 				}
 				
-				asked++;
+				finalAsked++;
 			}
+
+			System.out.println("Validation");
+			System.out.println("\tFile: " + path);
+			System.out.println("\tParameters: " + params);
+			System.out.println("\tAsked: " + finalAsked);
+			System.out.println("\tCorrect: " + finalCorrect);
+			System.out.println(String.format("\t%s Correct: %.2f%s\n", "%", (double) finalCorrect/(double) finalAsked * 100, "%"));
 		}
+
 	}
-	
+
 	private static Parameters calculateParameters(String answer, QuestionGraph qGraph, GlobalGraph gGraph, Parameters params){
 		if(params == null){
 			params = new Parameters();
@@ -73,7 +124,7 @@ public class EM{
 
 		RankResult initResult = ranker.rankSentences(qGraph, gGraph);
 		int originalRank = initResult.getRank(answer);
-		
+
 		if(originalRank > MAX_ALLOWED_RANK){
 			int lastRank = originalRank,
 					currRank = originalRank;
@@ -87,10 +138,10 @@ public class EM{
 					lastRank = currRank;
 					currRank = result.getRank(answer); 
 				}while(currRank < lastRank);
-				
+
 				tempParams.setParameter(paramKey, tempParams.get(paramKey) - .1);
 			}
-			
+
 			if(lastRank <= MAX_ALLOWED_RANK){
 				params = tempParams;
 			}
@@ -98,7 +149,7 @@ public class EM{
 				return null;
 			}
 		}
-		
+
 		return params;
 	}
 
@@ -106,9 +157,9 @@ public class EM{
 		List<String> paths  = new ArrayList<String>();
 
 		paths.add(basePath + "level2/rm2-1.ser");
-		//paths.add(basePath + "level2/rm2-15.ser");
-		//paths.add(basePath + "level2/rm2-3.ser");
-		//paths.add(basePath + "level2/rm2-13.ser");
+		paths.add(basePath + "level2/rm2-15.ser");
+		paths.add(basePath + "level2/rm2-3.ser");
+		paths.add(basePath + "level2/rm2-13.ser");
 
 		return paths;
 	}
@@ -126,7 +177,7 @@ public class EM{
 		List<String> rm215Answers = new ArrayList<String>();
 		rm215Answers.add("Baby Shamu 's mother is named Kandu .");
 		rm215Answers.add("Her name is Baby Shamu .");
-		rm215Answers.add("-LRB- ORLANDO , FLORIDA , September , 1985 -RRB- - A six-foot-long baby was born this month .");
+		rm215Answers.add("-LRB- ORLANDO , FLORIDA , September , 1985 -RRB-");
 		rm215Answers.add("She was born in a sea animal park called Sea World .");
 		rm215Answers.add("Baby Shamu will be the first killer whale to grow up with people .");
 
@@ -138,10 +189,10 @@ public class EM{
 		rm23Answers.add("He wrote it so young people could feel proud of their land .");
 
 		List<String> rm213Answers = new ArrayList<String>();
-		rm213Answers.add("-LRB- RUSSIA , July , 1987 -RRB- - Today , a girl named Lynne Cox swam from the United States to Russia !");
+		rm213Answers.add("Today , a girl named Lynne Cox swam from the United States to Russia !");
 		rm213Answers.add("To get ready for this swim , Lynne swam miles each day in ice-cold water .");
-		rm213Answers.add("-LRB- RUSSIA , July , 1987 -RRB- - Today , a girl named Lynne Cox swam from the United States to Russia !");
-		rm213Answers.add("-LRB- RUSSIA , July , 1987 -RRB- - Today , a girl named Lynne Cox swam from the United States to Russia !");
+		rm213Answers.add("-LRB- RUSSIA , July , 1987 -RRB-");
+		rm213Answers.add("She left from an island in Alaska .");
 		rm213Answers.add("They were ready to help if she needed it .");
 
 		answerLists.add(rm21Answers);
