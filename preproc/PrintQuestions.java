@@ -4,7 +4,7 @@ import graph.SentenceGraph;
 
 public class PrintQuestions {
 	private static final int LEVEL = 2,
-			SET = 15;
+			SET = 24;
 	public static void main(String[] args) {
 		Parser.readSetFromFile(String.format("all-remedia-processed/level%d/rm%d-%d.ser", LEVEL, LEVEL, SET));
 		

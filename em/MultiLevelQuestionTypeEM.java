@@ -59,7 +59,7 @@ public class MultiLevelQuestionTypeEM {
 		System.out.println(String.format("Number in top ranks: %d", topRanks.size()));
 		System.out.println(String.format("Total Questions: %d", totalQuestions));
 		System.out.println(String.format("Percent correct: %.2f", (double)topRanks.size()/(double)totalQuestions * 100));
-		
+
 		List<String> validationPaths = initValidationPaths();
 		List<List<String>> validationAnswers = initValidationAnswerLists();
 		int idx = 0, total = 0, success = 0;
@@ -72,7 +72,7 @@ public class MultiLevelQuestionTypeEM {
 			QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
 			GlobalGraph gGraph = Parser.getGlobalGraph();
 			System.out.println();
-			
+
 			for(int i = 0; i < qGraphs.length; i++){
 				QuestionGraph qGraph = qGraphs[i];
 				String answer = answers.get(i);
@@ -89,21 +89,21 @@ public class MultiLevelQuestionTypeEM {
 					System.out.println(qGraph);
 					System.exit(0);
 				}
-				
+
 				Ranker ranker = new Ranker(params);
 				RankResult result = ranker.rankSentences(qGraph, gGraph);
-				
+
 				int rank = result.getRank(answer);
-				
+
 				if(rank <= MAX_RANK){
 					System.out.println(String.format("%s", qGraph));
 					success++;
 				}
-				
+
 				total++;
 			}
 		}
-		
+
 		System.out.println(String.format("\nTotal: %d", total));
 		System.out.println(String.format("Success: %d", success));
 	}
@@ -140,23 +140,25 @@ public class MultiLevelQuestionTypeEM {
 
 			update = false;
 
-			for(String key : paramVals.keySet()){
-				currRanks = calculateRankResults(trainingStructs, params);
-				Double currParamVal = paramVals.get(key);
-				//System.out.println(key);
-
-				do{
-					//	System.out.println(currParamVal);
-					currParamVal += .1;
-					params.setParameter(key, currParamVal);
-					lastRanks = currRanks;
+			for(int k = 0; k < 3; k++){
+				for(String key : paramVals.keySet()){
 					currRanks = calculateRankResults(trainingStructs, params);
-				}while(ranksImproved(currRanks, lastRanks));
+					Double currParamVal = paramVals.get(key);
+					//System.out.println(key);
 
-				params.setParameter(key, currParamVal - .1);
+					do{
+						//	System.out.println(currParamVal);
+						currParamVal += .1;
+						params.setParameter(key, currParamVal);
+						lastRanks = currRanks;
+						currRanks = calculateRankResults(trainingStructs, params);
+					}while(ranksImproved(currRanks, lastRanks));
+
+					params.setParameter(key, currParamVal - .1);
+				}
 			}
 
-			
+
 			for(int i = 0; i < trainingStructs.size(); i++){
 				TrainingStruct struct = trainingStructs.get(i);
 				GlobalGraph newGGraph = updateGlobalGraph(struct, params);
@@ -166,7 +168,7 @@ public class MultiLevelQuestionTypeEM {
 					struct.setGGraph(newGGraph);
 					trainingStructs.set(i, struct);
 				}
-				
+
 				System.out.println(update);
 			}
 		}while(update);
