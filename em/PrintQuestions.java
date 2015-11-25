@@ -3,8 +3,8 @@ import graph.QuestionGraph;
 import graph.SentenceGraph;
 
 public class PrintQuestions {
-	private static final int LEVEL = 3,
-			SET = 10;
+	private static final int LEVEL = 2,
+			SET = 15;
 	public static void main(String[] args) {
 		Parser.readSetFromFile(String.format("all-remedia-processed/level%d/rm%d-%d.ser", LEVEL, LEVEL, SET));
 		

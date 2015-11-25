@@ -8,10 +8,12 @@ import graph.SentenceGraph;
 public class RankResult {
 	private List<Double> sortedKeys;
 	private Map<Double, List<SentenceGraph>> rankedGraphs;
+	private Map<SentenceGraph, Integer> rankedGraphsBySentence;
 	
 	public RankResult(List<Double> sortedKeys2, Map<Double, List<SentenceGraph>> rankedGraphs){
 		setSortedKeys(sortedKeys2);
 		setRankedGraphs(rankedGraphs);
+		setRankedGraphsBySentence(null);
 	}
 	
 	public int getRank(SentenceGraph sGraph){
@@ -49,6 +51,16 @@ public class RankResult {
 
 		return -1;
 	}
+	
+	private void calculateRankedGraphsBySentence(){
+		for(Double key : rankedGraphs.keySet()){
+			List<SentenceGraph> sGraphs = rankedGraphs.get(key);
+			
+			for(SentenceGraph sGraph : sGraphs){
+				rankedGraphsBySentence.put(sGraph, getRank(sGraph.getSentence()));
+			}
+		}
+	}
 
 	//Getters & Setters
 	
@@ -66,5 +78,16 @@ public class RankResult {
 
 	public void setRankedGraphs(Map<Double, List<SentenceGraph>> rankedGraphs) {
 		this.rankedGraphs = rankedGraphs;
+	}
+
+	public Map<SentenceGraph, Integer> getRankedGraphsBySentence() {
+		if(rankedGraphsBySentence == null){
+			calculateRankedGraphsBySentence();
+		}
+		return rankedGraphsBySentence;
+	}
+
+	public void setRankedGraphsBySentence(Map<SentenceGraph, Integer> rankedGraphsBySentence) {
+		this.rankedGraphsBySentence = rankedGraphsBySentence;
 	}
 }
