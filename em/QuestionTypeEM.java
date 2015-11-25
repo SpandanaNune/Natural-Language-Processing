@@ -11,62 +11,40 @@ import ranker.RankResult;
 import ranker.Ranker;
 
 public class QuestionTypeEM{
+	private static Map<String, Parameters> questionTypeParams = new HashMap<String, Parameters>();
 	private static String basePath = "all-remedia-processed/";
 	private static final int MAX_ALLOWED_RANK = 1;
 
 	public static void main(String[] args) throws FileNotFoundException{
-		List<String> paths = initPaths();
-		List<List<String>> answerLists = initAnswerLists();
-		Map<String, Parameters> questionTypeParams = new HashMap<String, Parameters>();
+		Map<String, List<TrainingStruct>> trainingStructs = groupQuestionsByType();
+		List<String> printed = new ArrayList<String>();
 
 		boolean reset = true;
 		int correct = 0, asked = 0;
 
 		//TRAINING LOOP
 
-		for(int i = 0; i < paths.size(); i++){
+		for(String key : trainingStructs.keySet()){
+			List<TrainingStruct> structs = trainingStructs.get(key);
+
 			if(reset){
 				reset = false;
 				asked = 0;
 				correct = 0;
 			}
 
-			String path = paths.get(i);
-			List<String> answers = answerLists.get(i);
-			Parser.readSetFromFile(path);
-			QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
-			GlobalGraph gGraph = Parser.getGlobalGraph();
+			for(int i = 0; i < structs.size(); i++){
+				TrainingStruct currStruct = structs.get(i);
+				QuestionGraph qGraph = currStruct.getQGraph();
+				GlobalGraph gGraph = currStruct.getGGraph();
+				String answer = currStruct.getAnswer();
 
-			for(int j = 0; j < answers.size(); j++){
-				String answer = answers.get(j);
-				QuestionGraph qGraph = qGraphs[j];
-
-				if(qGraph.getSentence().contains("Why") || qGraph.getSentence().contains("How")){
-					continue;
+				if(!printed.contains(qGraph.getAnswerType())){
+					System.out.println(String.format("Training '%s' Questions:\n", qGraph.getAnswerType()));
+					printed.add(qGraph.getAnswerType());
 				}
-				else if(qGraph.getAnswerType() == null || qGraph.getAnswerType().isEmpty()){
-					System.out.println(String.format("Answer type for '%s' is empty.", qGraph));
-
-					if(qGraph.getSentence().contains("Who")){
-						qGraph.setAnswerType("person");
-					}
-					
-					if(!questionTypeParams.containsKey(qGraph.getAnswerType())){
-						questionTypeParams.put(qGraph.getAnswerType(), new Parameters());
-					}
-				}
-
-				if(!questionTypeParams.containsKey(qGraph.getAnswerType())){
-					questionTypeParams.put(qGraph.getAnswerType(), new Parameters());
-				}
-
 				Parameters currParams = questionTypeParams.get(qGraph.getAnswerType());
 				Parameters tempParams = calculateParameters(answer, qGraph, gGraph, currParams);
-
-				/*
-					System.out.println(String.format("Question: %s", qGraph.getSentence()));
-					System.out.println(String.format("Answer: %s", answer));
-				 */
 
 				if(tempParams == null){
 					//	System.out.println("FAILED\n");
@@ -78,7 +56,6 @@ public class QuestionTypeEM{
 						//		System.out.println("Changing Parameter Values & Restarting\n");
 						currParams = tempParams;
 						questionTypeParams.replace(qGraph.getAnswerType(), currParams);
-						j = -1;
 						i = -1;
 						reset = true;
 						continue;
@@ -92,66 +69,105 @@ public class QuestionTypeEM{
 		}
 
 		//VALIDATION LOOP
-		String validationPath = String.format("%slevel3/rm3-1.ser", basePath);
+		List<String> validationPaths = initValidationPaths();
+		List<List<String>> answersList = initValidationAnswerLists();
 
-		List<String> answers = new ArrayList<String>();
-		answers.add("At noon , two small children cut a ribbon .");
-		answers.add("It is called the Empire State Building .");
-		answers.add("-LRB- NEW YORK : May 1 , 1931 -RRB- .");
-		answers.add("-LRB- NEW YORK : May 1 , 1931 -RRB- .");
-		answers.add("They can see at least 50 miles away .");
+		for(int j = 0; j < validationPaths.size(); j++){
+			String path = validationPaths.get(j);
+			List<String> answers = answersList.get(j);
+			Parser.readSetFromFile(path);
+			QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
+			GlobalGraph gGraph = Parser.getGlobalGraph();
+			int finalCorrect = 0, finalAsked = 0;
 
-		Parser.readSetFromFile(validationPath);
-		QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
-		GlobalGraph gGraph = Parser.getGlobalGraph();
-		int finalCorrect = 0, finalAsked = 0;
+			for(int i = 0; i < answers.size(); i++){
+				QuestionGraph qGraph = qGraphs[i];
 
-		for(int i = 0; i < answers.size(); i++){
-			QuestionGraph qGraph = qGraphs[i];
-
-			if(qGraph.getSentence().contains("Why") || qGraph.getSentence().contains("How")){
-				continue;
-			}
-			else if(qGraph.getAnswerType() == null || qGraph.getAnswerType().isEmpty()){
-				System.out.println(String.format("Answer type for '%s' is empty.", qGraph));
-
-				if(qGraph.getSentence().contains("Who")){
-					qGraph.setAnswerType("person");
+				if(qGraph.getSentence().contains("Why") || qGraph.getSentence().contains("How")){
+					continue;
 				}
-				
+				else if(qGraph.getAnswerType() == null || qGraph.getAnswerType().isEmpty()){
+					System.out.println(String.format("Answer type for '%s' is empty.", qGraph));
+
+					if(qGraph.getSentence().contains("Who")){
+						qGraph.setAnswerType("person");
+					}
+
+					if(!questionTypeParams.containsKey(qGraph.getAnswerType())){
+						questionTypeParams.put(qGraph.getAnswerType(), new Parameters());
+					}
+				}
+
 				if(!questionTypeParams.containsKey(qGraph.getAnswerType())){
 					questionTypeParams.put(qGraph.getAnswerType(), new Parameters());
 				}
+
+				Parameters params = questionTypeParams.get(qGraph.getAnswerType());
+				Ranker ranker = new Ranker(params);
+				String answer = answers.get(i);
+				RankResult result = ranker.rankSentences(qGraph, gGraph);
+
+				int rank = result.getRank(answer);
+
+				if(rank <= MAX_ALLOWED_RANK){
+					finalCorrect++;
+				}
+
+				finalAsked++;
 			}
 
-			if(!questionTypeParams.containsKey(qGraph.getAnswerType())){
-				questionTypeParams.put(qGraph.getAnswerType(), new Parameters());
-			}
+			System.out.println("Validation");
+			System.out.println("\tFile: " + path);
+			System.out.println("\tAsked: " + finalAsked);
+			System.out.println("\tCorrect: " + finalCorrect);
+			System.out.println(String.format("\t%s Correct: %.2f%s\n", "%", (double) finalCorrect/(double) finalAsked * 100, "%"));
 
-			Parameters params = questionTypeParams.get(qGraph.getAnswerType());
-			Ranker ranker = new Ranker(params);
-			String answer = answers.get(i);
-			RankResult result = ranker.rankSentences(qGraph, gGraph);
-
-			int rank = result.getRank(answer);
-
-			if(rank <= MAX_ALLOWED_RANK){
-				finalCorrect++;
-			}
-
-			finalAsked++;
 		}
-
-		System.out.println("Validation");
-		System.out.println("\tFile: " + validationPath);
-		System.out.println("\tAsked: " + finalAsked);
-		System.out.println("\tCorrect: " + finalCorrect);
-		System.out.println(String.format("\t%s Correct: %.2f%s\n", "%", (double) finalCorrect/(double) finalAsked * 100, "%"));
 
 		for(String key : questionTypeParams.keySet()){
 			System.out.println(String.format("Parameters for %s: %s", key, questionTypeParams.get(key)));
 		}
 
+	}
+
+	private static Map<String, List<TrainingStruct>> groupQuestionsByType(){
+		List<String> paths = initPaths();
+		List<List<String>> answerLists = initAnswerLists();
+		Map<String, List<TrainingStruct>> trainingStructs = new HashMap<String, List<TrainingStruct>>();
+
+		for(int i = 0; i < paths.size(); i++){
+			String path = paths.get(i);
+			List<String> answers = answerLists.get(i);
+			Parser.readSetFromFile(path);
+			QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
+			GlobalGraph gGraph = Parser.getGlobalGraph();
+
+			for(int j = 0; j < qGraphs.length; j++){
+				QuestionGraph qGraph = qGraphs[j];
+				String answer = answers.get(j);
+
+				if(qGraph.getAnswerType() == null){
+					if(qGraph.getSentence().contains("Who")){
+						qGraph.setAnswerType("person");
+					}
+					else if(qGraph.getSentence().contains("Why")){
+						qGraph.setAnswerType("reason");
+					}
+					else{
+						System.out.println(String.format("Answer type null for '%s': ", qGraph));
+					}
+				}
+
+				if(!trainingStructs.containsKey(qGraph.getAnswerType())){
+					trainingStructs.put(qGraph.getAnswerType(), new ArrayList<TrainingStruct>());
+					questionTypeParams.put(qGraph.getAnswerType(), new Parameters());
+				}
+
+				trainingStructs.get(qGraph.getAnswerType()).add(new TrainingStruct(qGraph, answer, gGraph));
+			}
+		}
+
+		return trainingStructs;
 	}
 
 	private static Parameters calculateParameters(String answer, QuestionGraph qGraph, GlobalGraph gGraph, Parameters params){
@@ -211,6 +227,39 @@ public class QuestionTypeEM{
 		usedIndices.add(retVal);
 
 		return retVal;
+	}
+
+	private static List<String> initValidationPaths(){
+		List<String> paths = new ArrayList<String>();
+
+		paths.add(String.format("%slevel3/rm3-1.ser", basePath));
+		paths.add(String.format("%slevel3/rm3-10.ser", basePath));
+
+		return paths;
+	}
+
+	private static List<List<String>> initValidationAnswerLists(){
+		List<List<String>> answerLists = new ArrayList<List<String>>();
+
+		List<String> answers31 = new ArrayList<String>();
+		answers31.add("At noon , two small children cut a ribbon .");
+		answers31.add("It is called the Empire State Building .");
+		answers31.add("-LRB- NEW YORK : May 1 , 1931 -RRB- .");
+		answers31.add("-LRB- NEW YORK : May 1 , 1931 -RRB- .");
+		answers31.add("They can see at least 50 miles away .");
+
+		List<String> answers310 = new ArrayList<String>();
+		answers310.add("The Walt Disney Show was the first TV show to air in color each week .");
+		answers310.add("It was about the New York World 's Fair .");
+		answers310.add("But not many of them were sold until about 1948 .");
+		answers310.add("Each TV had to be hooked up to special wires underground .");
+		answers310.add("They form the faces and buildings you see on your television .");
+
+
+		answerLists.add(answers31);
+		answerLists.add(answers310);
+
+		return answerLists;
 	}
 
 	private static List<String> initPaths(){
