@@ -17,18 +17,20 @@ public class MultiLevelQuestionTypeEM {
 	private static int MAX_RANK = 0;
 
 	public static void main(String[] args) {
+		Map<String, Parameters> paramList = new HashMap<String, Parameters>();
 		Map<String, List<TrainingStruct>> trainingStructs = groupQuestionsByType();
 		int totalQuestions = getNumQuestions(trainingStructs), numExcluded = 0;
 
 		for(String key : trainingStructs.keySet()){
 			List<TrainingStruct> structs = trainingStructs.get(key);
-			
+
 			if(isWhyQuestion(structs.get(0)) || isHowQuestion(structs.get(0))){
 				numExcluded += structs.size();
 				continue;
 			}
 
 			Parameters params = calculateParametersForList(structs);
+			paramList.put(key, params);
 			//Parameters nextParams = calculateParametersForList(structs, params);
 		}
 
@@ -39,72 +41,161 @@ public class MultiLevelQuestionTypeEM {
 			if(isWhyQuestion(structs.get(0)) || isHowQuestion(structs.get(0))){
 				continue;
 			}
-			
+
 			for(TrainingStruct struct : structs){
 				QuestionGraph qGraph = struct.getQGraph();
-				
+
 				if(!topRanks.contains(qGraph)){
 					num++;
 					System.out.println(String.format("%d. %s", num, qGraph));
 				}
 			}
 		}
-		
+
 		totalQuestions = totalQuestions - numExcluded;
-		
+
 		System.out.println();
 		System.out.println(String.format("Max allowed rank %d", MAX_RANK));
 		System.out.println(String.format("Number in top ranks: %d", topRanks.size()));
 		System.out.println(String.format("Total Questions: %d", totalQuestions));
 		System.out.println(String.format("Percent correct: %.2f", (double)topRanks.size()/(double)totalQuestions * 100));
+		
+		List<String> validationPaths = initValidationPaths();
+		List<List<String>> validationAnswers = initValidationAnswerLists();
+		int idx = 0, total = 0, success = 0;
 
+		for(String path : validationPaths){
+			Parser.readSetFromFile(path);
+
+			List<String> answers = validationAnswers.get(idx);
+			idx++;
+			QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
+			GlobalGraph gGraph = Parser.getGlobalGraph();
+			System.out.println();
+			
+			for(int i = 0; i < qGraphs.length; i++){
+				QuestionGraph qGraph = qGraphs[i];
+				String answer = answers.get(i);
+				Parameters params = null;
+
+				if(qGraph.getSentence().contains("Why") || qGraph.getSentence().contains("How")){
+					continue;
+				}
+
+				if(paramList.containsKey(qGraph.getAnswerType())){
+					params = paramList.get(qGraph.getAnswerType());		
+				}
+				else{
+					System.out.println(qGraph);
+					System.exit(0);
+				}
+				
+				Ranker ranker = new Ranker(params);
+				RankResult result = ranker.rankSentences(qGraph, gGraph);
+				
+				int rank = result.getRank(answer);
+				
+				if(rank <= MAX_RANK){
+					System.out.println(String.format("%s", qGraph));
+					success++;
+				}
+				
+				total++;
+			}
+		}
+		
+		System.out.println(String.format("\nTotal: %d", total));
+		System.out.println(String.format("Success: %d", success));
 	}
-	
+
 	private static boolean isWhyQuestion(TrainingStruct struct){
 		return struct.getQGraph().getSentence().contains("Why");
 	}
-	
+
 	private static boolean isHowQuestion(TrainingStruct struct){
 		return struct.getQGraph().getSentence().contains("How");
 	}
-	
+
 	private static int getNumQuestions(Map<String, List<TrainingStruct>> trainingStructs){
 		int ret = 0;
-		
+
 		for(String key : trainingStructs.keySet()){
 			for(TrainingStruct s : trainingStructs.get(key)){
 				ret++;
 			}
 		}
-		
+
 		return ret;
 	}
 
 	private static Parameters calculateParametersForList(List<TrainingStruct> trainingStructs, Parameters params) {
 		Map<String, Double> paramVals = params.getParameters();
-		Map<QuestionGraph, Integer> currRanks = null, lastRanks;
-		
-		for(String key : paramVals.keySet()){
-			currRanks = calculateRankResults(trainingStructs, params);
-			Double currParamVal = paramVals.get(key);
-			//System.out.println(key);
+		Map<QuestionGraph, Integer> currRanks = null, lastRanks = null;
+		boolean update = false;
 
-			do{
-			//	System.out.println(currParamVal);
-				currParamVal += .1;
-				params.setParameter(key, currParamVal);
-				lastRanks = currRanks;
+		do{
+			if(update){
+				params = new Parameters();
+			}
+
+			update = false;
+
+			for(String key : paramVals.keySet()){
 				currRanks = calculateRankResults(trainingStructs, params);
-			}while(ranksImproved(currRanks, lastRanks));
+				Double currParamVal = paramVals.get(key);
+				//System.out.println(key);
+
+				do{
+					//	System.out.println(currParamVal);
+					currParamVal += .1;
+					params.setParameter(key, currParamVal);
+					lastRanks = currRanks;
+					currRanks = calculateRankResults(trainingStructs, params);
+				}while(ranksImproved(currRanks, lastRanks));
+
+				params.setParameter(key, currParamVal - .1);
+			}
+
 			
-			params.setParameter(key, currParamVal - .1);
-		}
-		
-		for(QuestionGraph key : currRanks.keySet()){
-			System.out.println(String.format("Question: %s\nAnswer Rank: %d\n", key, currRanks.get(key)));
+			for(int i = 0; i < trainingStructs.size(); i++){
+				TrainingStruct struct = trainingStructs.get(i);
+				GlobalGraph newGGraph = updateGlobalGraph(struct, params);
+
+				if(!newGGraph.toString().equals(struct.getGGraph().toString())){
+					update = true;
+					struct.setGGraph(newGGraph);
+					trainingStructs.set(i, struct);
+				}
+				
+				System.out.println(update);
+			}
+		}while(update);
+
+		for(QuestionGraph key : lastRanks.keySet()){
+			System.out.println(String.format("Question: %s\nAnswer Rank: %d\n", key, lastRanks.get(key)));
 		}
 
 		return params;
+	}
+
+	private static GlobalGraph updateGlobalGraph(TrainingStruct struct, Parameters params){
+		Ranker ranker = new Ranker(params);
+		GlobalGraph newGGraph = new GlobalGraph(),
+				gGraph = struct.getGGraph();
+		QuestionGraph qGraph = struct.getQGraph();
+		RankResult result = ranker.rankSentences(qGraph, gGraph);
+
+		int topRank = result.getRank(struct.getAnswer());
+
+		for(SentenceGraph sGraph : gGraph.getSentences()){
+			int rank = result.getRank(sGraph);
+
+			if(rank <= topRank){
+				newGGraph.add(sGraph);
+			}
+		}
+
+		return newGGraph;
 	}
 
 	private static Parameters calculateParametersForList(List<TrainingStruct> trainingStructs){
@@ -136,10 +227,10 @@ public class MultiLevelQuestionTypeEM {
 				if(currRanks.get(key) > MAX_RANK){
 					return false;
 				}
-				
+
 				continue;
 			}
-			
+
 			if(currRanks.get(key) <= MAX_RANK){
 				topRanks.add(key);
 			}

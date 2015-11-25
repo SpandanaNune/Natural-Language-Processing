@@ -13,7 +13,7 @@ import ranker.Ranker;
 public class QuestionTypeEM{
 	private static Map<String, Parameters> questionTypeParams = new HashMap<String, Parameters>();
 	private static String basePath = "all-remedia-processed/";
-	private static final int MAX_ALLOWED_RANK = 12;
+	private static final int MAX_ALLOWED_RANK = 5;
 
 	public static void main(String[] args) throws FileNotFoundException{
 		Map<String, List<TrainingStruct>> trainingStructs = groupQuestionsByType();
