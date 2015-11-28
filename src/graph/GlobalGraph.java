@@ -30,6 +30,20 @@ public class GlobalGraph extends Graph {
 		}
 	}
 	
+	public boolean contains(String s){
+		for(SentenceGraph sGraph : sentences){
+			if(sGraph.getSentence().equals(s)){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean contains(SentenceGraph sGraph){
+		return contains(sGraph.getSentence());
+	}
+	
 	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();

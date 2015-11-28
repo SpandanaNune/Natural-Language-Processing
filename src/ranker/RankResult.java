@@ -1,5 +1,7 @@
 package ranker;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +15,34 @@ public class RankResult {
 	public RankResult(List<Double> sortedKeys2, Map<Double, List<SentenceGraph>> rankedGraphs){
 		setSortedKeys(sortedKeys2);
 		setRankedGraphs(rankedGraphs);
-		setRankedGraphsBySentence(null);
+		setRankedGraphsBySentence(new HashMap<SentenceGraph, Integer>());
 	}
 	
+	public RankResult() {
+		setSortedKeys(new ArrayList<Double>());
+		setRankedGraphs(new HashMap<Double, List<SentenceGraph>>());
+		setRankedGraphsBySentence(new HashMap<SentenceGraph, Integer>());
+	}
+	
+	public void removeGraph(SentenceGraph sGraph){
+		if(rankedGraphsBySentence.containsKey(sGraph)){
+			rankedGraphsBySentence.remove(sGraph);
+			removeFromRankedGraph(sGraph);
+		}
+	}
+	
+	private void removeFromRankedGraph(SentenceGraph sGraph){
+		for(Double key : sortedKeys){
+			List<SentenceGraph> sGraphList = rankedGraphs.get(key);
+		
+			if(sGraphList.contains(sGraph)){
+				sGraphList.remove(sGraph);
+				rankedGraphs.replace(key, sGraphList);
+				break;
+			}
+		}
+	}
+
 	public int getRank(SentenceGraph sGraph){
 		return getRank(sGraph.getSentence());
 	}
@@ -36,7 +63,7 @@ public class RankResult {
 			rank += sGraphList.size();
 		}
 
-		return -1;	
+		return Integer.MAX_VALUE;	
 	}
 	
 	
@@ -52,7 +79,7 @@ public class RankResult {
 		return -1;
 	}
 	
-	private void calculateRankedGraphsBySentence(){
+	public void calculateRankedGraphsBySentence(){
 		for(Double key : rankedGraphs.keySet()){
 			List<SentenceGraph> sGraphs = rankedGraphs.get(key);
 			

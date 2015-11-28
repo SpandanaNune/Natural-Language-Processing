@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
@@ -19,6 +20,7 @@ import graph.QuestionGraph;
 import graph.SentenceGraph;
 import module.graph.SentenceToGraph;
 import module.graph.helper.GraphPassingNode;
+import params.LevelParameters;
 
 public abstract class Parser {
 	private static Reader reader;
@@ -43,6 +45,29 @@ public abstract class Parser {
 		Parser.parse(qGraph, relationList);
 		
 		return qGraph; 
+	}
+	
+	public static Map<String, LevelParameters> readLevelParamsFromFile(String path){
+		File file = new File(path);
+
+		try {
+			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			
+			@SuppressWarnings("unchecked")
+			Map<String, LevelParameters> params = (Map<String, LevelParameters>) ois.readObject();
+	
+			ois.close();
+			fis.close();
+			
+			return params;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 	
 	public static GlobalGraph getGlobalGraph(){

@@ -1,5 +1,6 @@
 package params;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,7 +9,11 @@ import java.util.Map;
 
 import utils.CommonFunctions;
 
-public class Parameters {
+public class Parameters implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2363198832959282087L;
 	private Map<String, Double> parameters;
 	private static String[] PARAM_KEYS = {
 			"qaAnswerTypeFound", "qaAnswerTypeNotFound",
