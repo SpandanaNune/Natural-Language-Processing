@@ -63,7 +63,7 @@ public class LevelRankResult {
 	
 	}
 
-	public void printRanks(GlobalGraph gGraph) {
+	public void printRanks(GlobalGraph gGraph, int maxRank) {
 		Map<Integer, List<SentenceGraph>> sortedRanks = new HashMap<Integer, List<SentenceGraph>>();
 		List<Integer> sortedKeys = new ArrayList<Integer>();
 		
@@ -83,6 +83,11 @@ public class LevelRankResult {
 		
 		for(int i = 0; i < sortedKeys.size(); i++){
 			int rank = sortedKeys.get(i);
+			
+			if(rank > maxRank){
+				continue;
+			}
+
 			sb.append(String.format("Rank %d:\n", rank));
 			
 			for(SentenceGraph sGraph : sortedRanks.get(rank)){

@@ -168,10 +168,12 @@ public class MultiLevelQuestionTypeEM {
 			}
 
 			update = false;
+			int currSuccessCount, lastSuccessCount;
 
 			for(int k = 0; k < 3; k++){
-				for(String key : paramVals.keySet()){
+				for(String key : Parameters.getKeys()){
 					currRanks = calculateRankResults(trainingStructs, params);
+					currSuccessCount = successCount(currRanks);
 					Double currParamVal = paramVals.get(key);
 					//System.out.println(key);
 
@@ -180,8 +182,11 @@ public class MultiLevelQuestionTypeEM {
 						currParamVal += .1;
 						params.setParameter(key, currParamVal);
 						lastRanks = currRanks;
+						lastSuccessCount = currSuccessCount;
 						currRanks = calculateRankResults(trainingStructs, params);
-					}while(ranksImproved(currRanks, lastRanks));
+						currSuccessCount = successCount(currRanks);
+						
+					}while(currSuccessCount > lastSuccessCount || ranksImproved(currRanks, lastRanks));
 
 					params.setParameter(key, currParamVal - .1);
 				}
@@ -231,6 +236,18 @@ public class MultiLevelQuestionTypeEM {
 		}
 
 		return lParams;
+	}
+	
+	private static int successCount(Map<QuestionGraph, Integer> currRanks){
+		int count = 0;
+		
+		for(QuestionGraph key : currRanks.keySet()){
+			if(currRanks.get(key) <= MAX_RANK){
+				count++;
+			}
+		}
+
+		return count;
 	}
 
 	private static GlobalGraph updateGlobalGraph(TrainingStruct struct, Parameters params, int topRank){

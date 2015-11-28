@@ -15,11 +15,12 @@ import ranker.Ranker;
 public class RemediaQA {
 	private static String basePath = "all-remedia-processed/",
 			parametersPath = "serializedParamList.ser";
+	private static final int MAX_RANK = 5;
 
 	public static void main(String[] args) throws FileNotFoundException{
 		Map<String, LevelParameters> parameters = Parser.readLevelParamsFromFile(parametersPath);
 		printParameters(parameters);
-		Parser.readSetFromFile(new File(basePath + "level2/rm2-1.ser"));
+		Parser.readSetFromFile(new File(basePath + "level2/rm2-21.ser"));
 		QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
 		GlobalGraph gGraph = Parser.getGlobalGraph();
 		
@@ -42,7 +43,7 @@ public class RemediaQA {
 			LevelRankResult ranks = ranker.rankSentences(gGraph, qGraph);
 			
 			System.out.println(String.format("---Ranks for Question: %s---", qGraph));
-			ranks.printRanks(gGraph);
+			ranks.printRanks(gGraph, MAX_RANK);
 		}
 	}
 
