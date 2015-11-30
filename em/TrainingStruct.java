@@ -35,4 +35,14 @@ public class TrainingStruct {
 	public void setGGraph(GlobalGraph gGraph) {
 		this.gGraph = gGraph;
 	}
+	
+	@Override
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(String.format("Question: %s\n", qGraph));
+		sb.append(String.format("Answer: %s\n", answer));
+		
+		return sb.toString();
+	}
 }

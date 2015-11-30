@@ -1,6 +1,9 @@
+package utils;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
@@ -11,6 +14,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
@@ -34,7 +39,56 @@ public abstract class Parser {
 	private static HashMap<String, Integer> nnpCount, nnpsCount;
 	private static String[] fullTitles = {"Mister", "Missus", "Miss", "Doctor"};
 	private static ArrayList<String> fullTitlesList = new ArrayList<String>(Arrays.asList(fullTitles));
-	
+
+	private static final String SET_ANSWER_FILEPATH = "set-answer-files/";
+
+	public static Map<Integer, List<String>> parseAnswerFile(int level){
+		Map<Integer, List<String>> outMap = new HashMap<Integer, List<String>>();
+		File inFile = new File(String.format("%sl%d.txt", SET_ANSWER_FILEPATH, level));
+
+		FileReader fReader;
+		BufferedReader reader;
+
+		try{
+			Pattern pattern = Pattern.compile("SET ([0-9]+)");
+			Matcher matcher;
+			String line;
+			int setNum = 0;
+			fReader = new FileReader(inFile);
+			reader = new BufferedReader(fReader);
+
+			while((line = reader.readLine()) != null){
+				matcher = pattern.matcher(line);
+				if(matcher.find()){
+					setNum = Integer.parseInt(matcher.group(1));
+					outMap.put(setNum, new ArrayList<String>());
+					continue;
+				}
+
+				outMap.get(setNum).add(line);
+			}
+			reader.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(0);
+		}
+
+		List<Integer> keysToRemove = new ArrayList<Integer>();
+
+		for(Integer key : outMap.keySet()){
+			if(outMap.get(key).isEmpty()){
+				keysToRemove.add(key);
+			}
+		}
+
+		for(Integer key : keysToRemove){
+			outMap.remove(key);
+		}
+
+		return outMap;
+	}
+
 	public static QuestionGraph parseQuestion(String question){
 		init(question);
 
@@ -43,23 +97,23 @@ public abstract class Parser {
 		ArrayList<String> relationList = sortRelations(gpn2.getAspGraph());
 
 		Parser.parse(qGraph, relationList);
-		
+
 		return qGraph; 
 	}
-	
+
 	public static Map<String, LevelParameters> readLevelParamsFromFile(String path){
 		File file = new File(path);
 
 		try {
 			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
 			ObjectInputStream ois = new ObjectInputStream(fis);
-			
+
 			@SuppressWarnings("unchecked")
 			Map<String, LevelParameters> params = (Map<String, LevelParameters>) ois.readObject();
-	
+
 			ois.close();
 			fis.close();
-			
+
 			return params;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -69,23 +123,23 @@ public abstract class Parser {
 
 		return null;
 	}
-	
+
 	public static GlobalGraph getGlobalGraph(){
 		if(gGraph == null){
 			throw new IllegalArgumentException("You must call 'readSetFromFile' before calling this method.");
 		}
-		
+
 		GlobalGraph retVal = gGraph;
 		gGraph = null;
-		
+
 		return retVal;
 	}
-	
+
 	public static QuestionGraph[] getQuestionGraphs(){
 		if(qGraphs == null){
 			throw new IllegalArgumentException("You must call 'readSetFromFile' before calling this method.");
 		}
-		
+
 		QuestionGraph[] retVal = qGraphs;
 		qGraphs = null;
 
@@ -95,7 +149,7 @@ public abstract class Parser {
 	public static void readSetFromFile(String path) {
 		readSetFromFile(new File(path));
 	}
-	
+
 	public static void readSetFromFile(File file){
 		if(!file.exists()){
 			throw new IllegalArgumentException(String.format("File at '%s' does not exist.", file.getAbsolutePath()));
@@ -103,14 +157,14 @@ public abstract class Parser {
 		else if(!getExtension(file.getName()).equals("ser")){
 			throw new IllegalArgumentException("File to read from must have .ser extension.");
 		}
-		
+
 		try {
 			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
 			ObjectInputStream ois = new ObjectInputStream(fis);
-			
+
 			gGraph = (GlobalGraph) ois.readObject();
 			qGraphs= (QuestionGraph[]) ois.readObject();
-			
+
 			ois.close();
 			fis.close();
 		} catch (IOException e) {
@@ -119,10 +173,10 @@ public abstract class Parser {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static GlobalGraph parseText(String text){
 		init(text);
-		
+
 		int sentenceNum = 0;
 		GlobalGraph gGraph = new GlobalGraph();
 		String currSentence, modifiedSentence;
@@ -134,7 +188,7 @@ public abstract class Parser {
 
 		nnpMap = new HashMap<String, String>();
 		nnpsMap = new HashMap<String, String>();
-		
+
 		nnpCount = new HashMap<String, Integer>();
 		nnpsCount = new HashMap<String, Integer>();
 
@@ -146,33 +200,33 @@ public abstract class Parser {
 			for(String key : nnpsCount.keySet()){
 				nnpsCount.replace(key, nnpsCount.get(key) + 1);
 			}
-			
+
 			currSentence = sanitizeSentence(Sentence.listToString(sentenceWordList));
 			gpn2 = stg.extractGraph(currSentence,false,true,true);
 			relationList = gpn2.getAspGraph();
-			
+
 			modifiedSentence = baos.toString().split("\n")[0].replace("Modified:", "").trim();
-			
+
 			sGraph = new SentenceGraph(gpn2.getposMap(), currSentence, sentenceNum);
 			relationList = sortRelations(gpn2.getAspGraph());
-			
+
 
 			stdout.println("Sentence from kparser: " + modifiedSentence);
 			modifiedSentence = processSentence(modifiedSentence, gpn2.getposMap(), gpn2.getWordSenseMap(), relationList);
 			stdout.println("Modified Sentence: " + modifiedSentence + "\n");
 
 			parse(sGraph, relationList);
-			
+
 			sentenceNum++;
 			gGraph.add(sGraph);
 			baos.reset();
 		}
-		
+
 		System.setOut(stdout);
-		
+
 		return gGraph;
 	}
-	
+
 	private static String sanitizeSentence(String sentence){
 		String[] titles = {"Mr.", "Mrs.", "Ms.", "Dr."};
 
@@ -192,10 +246,10 @@ public abstract class Parser {
 				}
 			}
 		}
-		
+
 		return sentence;
 	}
-	
+
 	private static String processSentence(String sentence, HashMap<String, String> posMap, HashMap<String, ArrayList<String>> wsMap,
 			ArrayList<String> relationList){
 		StringBuilder output = new StringBuilder();
@@ -211,7 +265,7 @@ public abstract class Parser {
 				output.append(word + " ");
 				continue;
 			}
-			
+
 			if((pos = getPos(word, posMap)) != null){
 				if(fullTitlesList.contains(word)){
 					word = word + "_" + words[i+1];
@@ -219,7 +273,7 @@ public abstract class Parser {
 					pos = "NNP";
 					i++;
 				}
-				
+
 				if(i == 0 && (pos.equals("DT") || pos.equals("WRB")) && !word.toLowerCase().equals("the")){
 					pos = "PRP";
 				}
@@ -231,7 +285,7 @@ public abstract class Parser {
 				if(ws == null){
 					ws = getWS(word, wsMap);
 				}
-				
+
 				if(ws == null){
 					ws = isGroup(word, relationList) ? "noun.group" : null;
 				}
@@ -252,7 +306,7 @@ public abstract class Parser {
 							word = nnpsMap.get(ws);
 							nnpsCount.replace(ws, 0);
 						}
-						
+
 						replace = !replace;
 					}
 				}
@@ -299,7 +353,7 @@ public abstract class Parser {
 					}
 				}
 			}
-			
+
 			if(word.contains("_")){
 				output.append(word.replace("_", " ") + " ");
 			}
@@ -310,12 +364,12 @@ public abstract class Parser {
 
 		return output.toString().substring(0, output.length() - 1);
 	}
-	
+
 	private static String findWS(String str, String pos, ArrayList<String> relationList){
 		String[] commonPRP = {"he", "her", "we"},
 				commonPRP$ = {"his", "hers"};
 		str = str.toLowerCase().trim();
-		
+
 		if(pos.equals("PRP")){
 			for(String s : commonPRP){
 				if(str.equals(s)){
@@ -330,11 +384,11 @@ public abstract class Parser {
 				}
 			}
 		}
-		
+
 		if(isPerson(str, relationList)){
 			return "noun.person";
 		}
-		
+
 		return null;
 	}
 
@@ -348,15 +402,15 @@ public abstract class Parser {
 			parentName = elements[0];
 			relationship = elements[1];
 			childName = elements[2];
-			
+
 			if(parentName.equals(str) && relationship.equals("is_subclass_of") && childName.equals("group")){
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private static boolean isPerson(String str, ArrayList<String> relationList){
 		String[] elements;
 		String currRelation, parentName, relationship, childName;
@@ -367,12 +421,12 @@ public abstract class Parser {
 			parentName = elements[0];
 			relationship = elements[1];
 			childName = elements[2];
-			
+
 			if(parentName.equals(str) && relationship.equals("is_subclass_of") && childName.equals("person")){
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -382,30 +436,30 @@ public abstract class Parser {
 
 		for(String key : wsMap.keySet()){
 			tempKey = key.toLowerCase().trim();
-			
+
 			if((double) str.length()/(double) tempKey.length() >= .25 && (tempKey.contains(str) || str.contains(tempKey))){
 				return wsMap.get(key).get(1);
 			}
 		}
-		
+
 		return null;
 	}
 
 	private static String getPos(String str, HashMap<String, String> posMap){
 		String tempKey;
 		str = str.toLowerCase().trim();
-		
+
 		for(String key : posMap.keySet()){
 			tempKey = key.toLowerCase().trim();
-			
+
 			if((double) str.length()/(double) tempKey.length() >= .25 && (tempKey.contains(str) || str.contains(tempKey))){
 				return posMap.get(key);
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private static void parse(SentenceGraph graph, ArrayList<String> relationList){
 		String currRelation, parentName, childName, relationship;
 		String[] elements;
@@ -426,7 +480,7 @@ public abstract class Parser {
 			}
 		}
 	}
-	
+
 	private static void init(String input){
 		if(stg == null){
 			stg = new SentenceToGraph();
@@ -435,13 +489,13 @@ public abstract class Parser {
 		reader = new StringReader(input);
 		dp = new DocumentPreprocessor(reader);
 	}
-	
+
 	private static ArrayList<String> sortRelations(ArrayList<String> relations){
 		ArrayList<String> sortedRelations = new ArrayList<String>(),
 				instanceRelations = new ArrayList<String>(),
 				subclassRelations = new ArrayList<String>(),
 				coreferences = new ArrayList<String>();
-		
+
 		for(String relation : relations){
 			if(relation.contains("instance_of")){
 				if(!instanceRelations.contains(relation)){
@@ -464,29 +518,89 @@ public abstract class Parser {
 				}
 			}
 		}
-		
+
 		sortedRelations.addAll(instanceRelations);
 		sortedRelations.addAll(subclassRelations);
 		sortedRelations.addAll(coreferences);
-		
+
 		return sortedRelations;
 	}
 
 	private static String getExtension(String filename) {
-        if (filename == null) {
-            return null;
-        }
-        int extensionPos = filename.lastIndexOf('.');
-        int lastUnixPos = filename.lastIndexOf('/');
-        int lastWindowsPos = filename.lastIndexOf('\\');
-        int lastSeparator = Math.max(lastUnixPos, lastWindowsPos);
- 
-        int index = lastSeparator > extensionPos ? -1 : extensionPos;
-        if (index == -1) {
-            return "";
-        } else {
-            return filename.substring(index + 1);
-        }
-    }
+		if (filename == null) {
+			return null;
+		}
+		int extensionPos = filename.lastIndexOf('.');
+		int lastUnixPos = filename.lastIndexOf('/');
+		int lastWindowsPos = filename.lastIndexOf('\\');
+		int lastSeparator = Math.max(lastUnixPos, lastWindowsPos);
+
+		int index = lastSeparator > extensionPos ? -1 : extensionPos;
+		if (index == -1) {
+			return "";
+		} else {
+			return filename.substring(index + 1);
+		}
+	}
+
+	public static Map<Integer, Map<Integer, List<String>>> parseAnswerFiles(List<Integer> trainingLevels) {
+		Map<Integer, Map<Integer, List<String>>> outMap = new HashMap<Integer, Map<Integer, List<String>>>();
+
+		for(int level : trainingLevels){
+			File inFile = new File(String.format("%sl%d.txt", SET_ANSWER_FILEPATH, level));
+
+			FileReader fReader;
+			BufferedReader reader;
+
+			try{
+				Pattern pattern = Pattern.compile("SET ([0-9]+)");
+				Matcher matcher;
+				String line;
+				int setNum = 0;
+				fReader = new FileReader(inFile);
+				reader = new BufferedReader(fReader);
+				outMap.put(level, new HashMap<Integer, List<String>>());
+
+				while((line = reader.readLine()) != null){
+					matcher = pattern.matcher(line);
+					if(matcher.find()){
+						setNum = Integer.parseInt(matcher.group(1));
+						outMap.get(level).put(setNum, new ArrayList<String>());
+						continue;
+					}
+
+					outMap.get(level).get(setNum).add(line);
+				}
+				reader.close();
+			}
+			catch(IOException e){
+				e.printStackTrace();
+				System.exit(0);
+			}
+
+			Map<Integer, List<Integer>> keysToRemove = new HashMap<Integer, List<Integer>>();
+
+			for(Integer currLevel : outMap.keySet()){
+				Map<Integer, List<String>> map = outMap.get(currLevel);
+				keysToRemove.put(currLevel, new ArrayList<Integer>());
+
+				for(Integer key : map.keySet()){
+					if(outMap.get(currLevel).get(key).isEmpty()){
+						keysToRemove.get(currLevel).add(key);
+					}
+				}
+			}
+
+			for(Integer currLevel : keysToRemove.keySet()){
+				List<Integer> currList = keysToRemove.get(currLevel);
+
+				for(Integer remove : currList){
+					outMap.get(currLevel).remove(remove);
+				}
+			}
+		}
+
+		return outMap;
+	}
 
 }

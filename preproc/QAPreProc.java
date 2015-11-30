@@ -11,9 +11,10 @@ import java.util.List;
 
 import graph.GlobalGraph;
 import graph.QuestionGraph;
+import utils.Parser;
 
 public class QAPreProc {
-	private static final int MAX_LEVEL = 5;
+	private static final int MAX_LEVEL = 6;
 	private static final String OUT_DIR = "all-remedia-processed",
 			IN_DIR = "all-remedia-sanitized";
 	private static final Character[] SENTENCE_PUNCT = {'!', '.', '?'};

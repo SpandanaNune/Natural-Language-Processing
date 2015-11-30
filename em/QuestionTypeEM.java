@@ -9,6 +9,7 @@ import graph.QuestionGraph;
 import params.Parameters;
 import ranker.RankResult;
 import ranker.Ranker;
+import utils.Parser;
 
 public class QuestionTypeEM{
 	private static Map<String, Parameters> questionTypeParams = new HashMap<String, Parameters>();

@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import graph.GlobalGraph;
@@ -11,6 +12,7 @@ import ranker.LevelRankResult;
 import ranker.LevelRanker;
 import ranker.RankResult;
 import ranker.Ranker;
+import utils.Parser;
 
 public class RemediaQA {
 	private static String basePath = "all-remedia-processed/",
@@ -19,6 +21,8 @@ public class RemediaQA {
 
 	public static void main(String[] args) throws FileNotFoundException{
 		Map<String, LevelParameters> parameters = Parser.readLevelParamsFromFile(parametersPath);
+
+		/*
 		printParameters(parameters);
 		Parser.readSetFromFile(new File(basePath + "level2/rm2-21.ser"));
 		QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
@@ -45,6 +49,7 @@ public class RemediaQA {
 			System.out.println(String.format("---Ranks for Question: %s---", qGraph));
 			ranks.printRanks(gGraph, MAX_RANK);
 		}
+		*/
 	}
 
 	private static void printParameters(Map<String, LevelParameters> parameters) {

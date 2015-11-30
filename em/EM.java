@@ -7,6 +7,7 @@ import graph.QuestionGraph;
 import params.Parameters;
 import ranker.RankResult;
 import ranker.Ranker;
+import utils.Parser;
 
 public class EM{
 	private static String basePath = "all-remedia-processed/";
