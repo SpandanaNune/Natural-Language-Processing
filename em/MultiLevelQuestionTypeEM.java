@@ -23,12 +23,14 @@ public class MultiLevelQuestionTypeEM {
 	private static Map<String, Parameters> questionTypeParams = new HashMap<String, Parameters>();
 	private static List<QuestionGraph> topRanks = new ArrayList<QuestionGraph>();
 	private static String basePath = "all-remedia-processed/";
-	private static final int MAX_RANK = 5;
+	private static final int MAX_RANK = 2;
+	private static final boolean INCLUDE_TWO = false;
+	private static int minLevel = INCLUDE_TWO ? 2 : 3;
 
 	public static void main(String[] args) throws IOException {
 		Map<String, LevelParameters> paramList = new HashMap<String, LevelParameters>();
 
-		for(int validationSet = 2; validationSet < 6; validationSet++){
+		for(int validationSet = minLevel; validationSet < 6; validationSet++){
 
 			Map<String, List<TrainingStruct>> trainingStructs = groupQuestionsByType(validationSet);
 			int totalQuestions = getNumQuestions(trainingStructs), numExcluded = 0;
@@ -71,12 +73,12 @@ public class MultiLevelQuestionTypeEM {
 			System.out.println(String.format("Max allowed rank %d", MAX_RANK));
 			System.out.println(String.format("Number in top ranks: %d", topRanks.size()));
 			System.out.println(String.format("Total Questions: %d", totalQuestions));
-			System.out.println(String.format("Percent correct: %.2f", (double)topRanks.size()/(double)totalQuestions * 100));
+			System.out.println(String.format("Percent correct: %.4f", (double)topRanks.size()/(double)totalQuestions * 100));
 
 			//VALIDATION
 			Map<Integer, List<String>> validationMap = Parser.parseAnswerFile(validationSet);
 			Map<Integer, String> paths = initPaths(validationSet, validationMap);
-			int idx = 0, total = 0, success = 0;
+			int total = 0, success = 0;
 
 			for(Integer key : paths.keySet()){
 				String path = paths.get(key);
@@ -84,10 +86,8 @@ public class MultiLevelQuestionTypeEM {
 
 				Parser.readSetFromFile(path);
 
-				idx++;
 				QuestionGraph[] qGraphs = Parser.getQuestionGraphs();
 				GlobalGraph gGraph = Parser.getGlobalGraph();
-				System.out.println();
 
 				for(int i = 0; i < qGraphs.length; i++){
 					QuestionGraph qGraph = qGraphs[i];
@@ -98,7 +98,7 @@ public class MultiLevelQuestionTypeEM {
 
 					String answer = answers.get(i);
 					LevelParameters params = null;
-					
+
 					if(qGraph.getAnswerType() == null){
 						updateAnswerType(qGraph);
 					}
@@ -128,16 +128,22 @@ public class MultiLevelQuestionTypeEM {
 				}
 			}
 
+			System.out.println();
 			System.out.println(String.format("\nTotal: %d", total));
 			System.out.println(String.format("Success: %d", success));
+			System.out.println(String.format("PERCENT CORRECT: %.4f", (double) success/ (double) total));
+			
+			//writeLevelParams(paramList, validationSet);
 
-			writeLevelParams(paramList, validationSet);
-
+			if(INCLUDE_TWO){
+				break;
+			}
 		}
 	}
+	
 
 	private static void writeLevelParams(Map<String, LevelParameters> paramList, int validationSet) throws IOException {
-		File outFile = new File(String.format("serializedParamList-%d.ser", validationSet));
+		File outFile = new File(String.format("serializedParamList-%d_max_%d.ser", validationSet, MAX_RANK));
 
 		if(outFile.exists()){
 			outFile.delete();
@@ -340,7 +346,7 @@ public class MultiLevelQuestionTypeEM {
 		Map<String, List<TrainingStruct>> trainingStructs = new HashMap<String, List<TrainingStruct>>();
 		List<Integer> trainingSets = new ArrayList<Integer>();
 
-		for(int i = 2; i < 6; i++){
+		for(int i = minLevel; i < 6; i++){
 			if(i == exclude){
 				continue;
 			}

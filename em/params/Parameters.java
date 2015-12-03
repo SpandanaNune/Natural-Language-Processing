@@ -28,7 +28,7 @@ public class Parameters implements Serializable{
 		parameters = new HashMap<String, Double>();
 
 		for(String key : PARAM_KEYS){
-			parameters.put(key, 0.0);
+			parameters.put(key, 0.1);
 		}
 	}
 	
